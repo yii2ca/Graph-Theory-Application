@@ -6,36 +6,56 @@ import { kruskalMST, primMST } from '../algorithms/mst';
  */
 export const useMST = (nodes, setMstEdges, setTotalCost) => {
   const [isAnimating, setIsAnimating] = useState(false);
-  const [algorithm, setAlgorithm] = useState('kruskal');
 
   /**
    * Tìm MST với animation
+   * @param {string} algorithm - 'kruskal' hoặc 'prim'
    */
-  const findMST = async () => {
-    if (nodes.length < 2) return;
+  const findMST = async (algorithm = 'kruskal') => {
+    if (nodes.length < 2) {
+      console.warn('Cần ít nhất 2 đỉnh để tính MST');
+      return;
+    }
 
     setIsAnimating(true);
     setMstEdges([]);
+    setTotalCost(0);
 
-    // Chọn thuật toán
-    const result = algorithm === 'kruskal' 
-      ? kruskalMST(nodes) 
-      : primMST(nodes);
+    try {
+      // Chọn thuật toán
+      const result = algorithm === 'prim' 
+        ? primMST(nodes) 
+        : kruskalMST(nodes);
 
-    // Animation: hiển thị từng cạnh dần dần
-    for (let i = 0; i < result.mstEdges.length; i++) {
-      await new Promise(resolve => setTimeout(resolve, 500));
-      setMstEdges(prev => [...prev, result.mstEdges[i]]);
+      // Kiểm tra kết quả
+      if (!result || !result.mstEdges) {
+        console.error('Thuật toán trả về kết quả không hợp lệ');
+        setIsAnimating(false);
+        return;
+      }
+
+      console.log(`${algorithm.toUpperCase()} MST:`, {
+        edges: result.mstEdges.length,
+        totalCost: result.totalCost,
+        expectedEdges: nodes.length - 1
+      });
+
+      // Animation: hiển thị từng cạnh dần dần
+      for (let i = 0; i < result.mstEdges.length; i++) {
+        await new Promise(resolve => setTimeout(resolve, 300));
+        setMstEdges(prev => [...prev, result.mstEdges[i]]);
+      }
+
+      setTotalCost(result.totalCost);
+    } catch (error) {
+      console.error('Lỗi khi tính MST:', error);
+    } finally {
+      setIsAnimating(false);
     }
-
-    setTotalCost(result.totalCost);
-    setIsAnimating(false);
   };
 
   return {
     findMST,
-    isAnimating,
-    algorithm,
-    setAlgorithm
+    isAnimating
   };
 };

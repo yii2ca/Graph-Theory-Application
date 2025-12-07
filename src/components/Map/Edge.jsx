@@ -4,13 +4,16 @@ import { getMidPoint, pixelsToKm } from '../../utils/calculations';
 /**
  * Edge component - Đại diện cho một cạnh trong đồ thị
  */
-const Edge = ({ from, to, isMst, isDefault, weight, animationDelay = 0 }) => {
+const Edge = ({ from, to, isMst, isDefault, weight, distanceScale = 0.5, animationDelay = 0 }) => {
   const midPoint = getMidPoint(from, to);
   
   // Màu và độ dày
   const strokeColor = isMst ? '#10b981' : isDefault ? '#374151' : '#6b7280';
   const strokeWidth = isMst ? 4 : isDefault ? 1 : 2;
   const opacity = isMst ? 1 : isDefault ? 0.2 : 0.5;
+
+  // Tính khoảng cách in km
+  const distanceKm = weight ? pixelsToKm(weight, distanceScale) : null;
 
   return (
     <g className="edge-group">
@@ -30,39 +33,39 @@ const Edge = ({ from, to, isMst, isDefault, weight, animationDelay = 0 }) => {
         }}
       />
 
-      {/* Hiển thị trọng số cho MST edges */}
-      {isMst && weight && (
+      {/* Hiển thị khoảng cách cho tất cả cạnh */}
+      {distanceKm && (
         <g>
           {/* Background cho text */}
           <rect
-            x={midPoint.x - 30}
-            y={midPoint.y - 12}
-            width="60"
-            height="24"
-            fill="#0f172a"
+            x={midPoint.x - 32}
+            y={midPoint.y - 13}
+            width="64"
+            height="26"
+            fill={isMst ? '#0f172a' : '#1e1b4b'}
             rx="4"
-            opacity="0.9"
-            className="animate-fade-in"
+            opacity={isMst ? 0.95 : 0.8}
+            className={isMst ? 'animate-fade-in' : ''}
             style={{
-              animationDelay: `${animationDelay + 300}ms`
+              animationDelay: isMst ? `${animationDelay + 300}ms` : '0ms'
             }}
           />
           
-          {/* Text trọng số */}
+          {/* Text khoảng cách */}
           <text
             x={midPoint.x}
             y={midPoint.y}
             textAnchor="middle"
             dominantBaseline="central"
-            fill="#10b981"
-            fontSize="12"
-            fontWeight="bold"
-            className="pointer-events-none select-none animate-fade-in"
+            fill={isMst ? '#10b981' : '#a78bfa'}
+            fontSize={isMst ? '13' : '11'}
+            fontWeight={isMst ? 'bold' : '500'}
+            className="pointer-events-none select-none"
             style={{
-              animationDelay: `${animationDelay + 300}ms`
+              animation: isMst ? `fadeIn 0.5s ease-out ${animationDelay + 300}ms both` : 'none'
             }}
           >
-            {pixelsToKm(weight)} km
+            {distanceKm} km
           </text>
         </g>
       )}

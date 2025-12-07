@@ -1,38 +1,156 @@
-import React from 'react';
-import { Zap, Shuffle, Grid, Download } from 'lucide-react';
+import React, { useState, useRef } from 'react';
+import { ZoomIn, ZoomOut, Maximize2, Download, ArrowUp, ArrowDown, ArrowLeft, ArrowRight, GripVertical } from 'lucide-react';
+import './ToolBar.css';
 
 /**
- * ToolBar component - Thanh công cụ bổ sung
+ * ToolBar component - Công cụ bổ sung nổi trên canvas
  */
-const ToolBar = () => {
+const ToolBar = ({ onZoomIn, onZoomOut, onFitScreen, onDownload, onPanUp, onPanDown, onPanLeft, onPanRight }) => {
+  const [isVisible, setIsVisible] = useState(true);
+  const [position, setPosition] = useState({ x: 0, y: 0 });
+  const [isDragging, setIsDragging] = useState(false);
+  const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
+  const toolbarRef = useRef(null);
+
+  const handleMouseDown = (e) => {
+    setIsDragging(true);
+    setDragOffset({
+      x: e.clientX - position.x,
+      y: e.clientY - position.y
+    });
+  };
+
+  const handleMouseMove = (e) => {
+    if (!isDragging) return;
+
+    setPosition({
+      x: e.clientX - dragOffset.x,
+      y: e.clientY - dragOffset.y
+    });
+  };
+
+  const handleMouseUp = () => {
+    setIsDragging(false);
+  };
+
+  React.useEffect(() => {
+    if (isDragging) {
+      window.addEventListener('mousemove', handleMouseMove);
+      window.addEventListener('mouseup', handleMouseUp);
+      return () => {
+        window.removeEventListener('mousemove', handleMouseMove);
+        window.removeEventListener('mouseup', handleMouseUp);
+      };
+    }
+  }, [isDragging, dragOffset]);
+
+  if (!isVisible) return null;
+
   return (
-    <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 bg-black bg-opacity-70 backdrop-blur-md rounded-xl p-2 border border-purple-500/30 flex gap-2">
+    <div 
+      ref={toolbarRef}
+      className="toolbar"
+      style={{
+        left: `${position.x}px`,
+        top: `${position.y}px`,
+        cursor: isDragging ? 'grabbing' : 'grab',
+        transform: position.x === 0 && position.y === 0 ? 'none' : 'translate(0, 0)'
+      }}
+      onMouseDown={handleMouseDown}
+      onMouseUp={handleMouseUp}
+    >
       <button
-        className="p-3 hover:bg-purple-500/20 rounded-lg transition-all group"
-        title="Thuật toán nhanh"
+        className="toolbar__btn toolbar__grip"
+        title="Kéo để di chuyển"
+        onClick={(e) => e.stopPropagation()}
       >
-        <Zap className="text-yellow-400 group-hover:scale-110 transition-transform" size={20} />
+        <GripVertical size={16} />
       </button>
-      
+
       <button
-        className="p-3 hover:bg-purple-500/20 rounded-lg transition-all group"
-        title="Tạo ngẫu nhiên"
+        className="toolbar__btn"
+        title="Phóng to"
+        onClick={(e) => {
+          e.stopPropagation();
+          onZoomIn();
+        }}
       >
-        <Shuffle className="text-blue-400 group-hover:scale-110 transition-transform" size={20} />
+        <ZoomIn size={20} />
       </button>
-      
+
       <button
-        className="p-3 hover:bg-purple-500/20 rounded-lg transition-all group"
-        title="Hiện lưới"
+        className="toolbar__btn"
+        title="Thu nhỏ"
+        onClick={(e) => {
+          e.stopPropagation();
+          onZoomOut();
+        }}
       >
-        <Grid className="text-purple-400 group-hover:scale-110 transition-transform" size={20} />
+        <ZoomOut size={20} />
       </button>
-      
+
+      <div className="toolbar__divider"></div>
+
       <button
-        className="p-3 hover:bg-purple-500/20 rounded-lg transition-all group"
-        title="Xuất ảnh"
+        className="toolbar__btn"
+        title="Vừa với màn hình"
+        onClick={(e) => {
+          e.stopPropagation();
+          onFitScreen();
+        }}
       >
-        <Download className="text-green-400 group-hover:scale-110 transition-transform" size={20} />
+        <Maximize2 size={20} />
+      </button>
+
+      <div className="toolbar__divider"></div>
+
+      <div className="toolbar__pan-group" onClick={(e) => e.stopPropagation()}>
+        <button
+          className="toolbar__btn toolbar__btn--small"
+          title="Di chuyển lên"
+          onClick={onPanUp}
+        >
+          <ArrowUp size={16} />
+        </button>
+        
+        <div style={{ display: 'flex', gap: '4px' }}>
+          <button
+            className="toolbar__btn toolbar__btn--small"
+            title="Di chuyển trái"
+            onClick={onPanLeft}
+          >
+            <ArrowLeft size={16} />
+          </button>
+          
+          <button
+            className="toolbar__btn toolbar__btn--small"
+            title="Di chuyển xuống"
+            onClick={onPanDown}
+          >
+            <ArrowDown size={16} />
+          </button>
+          
+          <button
+            className="toolbar__btn toolbar__btn--small"
+            title="Di chuyển phải"
+            onClick={onPanRight}
+          >
+            <ArrowRight size={16} />
+          </button>
+        </div>
+      </div>
+
+      <div className="toolbar__divider"></div>
+
+      <button
+        className="toolbar__btn"
+        title="Tải ảnh"
+        onClick={(e) => {
+          e.stopPropagation();
+          onDownload();
+        }}
+      >
+        <Download size={20} />
       </button>
     </div>
   );

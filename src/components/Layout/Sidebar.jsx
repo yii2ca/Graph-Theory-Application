@@ -1,123 +1,287 @@
-import React from 'react';
-import { MapPin, Network, Activity, Settings, Info } from 'lucide-react';
+import React, { useState } from 'react';
+import { Activity, Network, MapPin, Plus, Trash2 } from 'lucide-react';
 import { useGraph } from '../../contexts/GraphContext';
-import { sampleGraphs, vietnamCities } from '../../data';
+import { sampleGraphs } from '../../data';
 import { pixelsToKm } from '../../utils/calculations';
+import Card from '../UI/Card';
+import Button from '../UI/Button';
+import './Sidebar.css';
 
-/**
- * Sidebar component với menu và thông tin
- */
 const Sidebar = () => {
   const {
     nodes,
+    edges,
     mstEdges,
     totalCost,
     isMenuOpen,
-    loadSampleGraph
+    distanceScale,
+    setDistanceScale,
+    loadSampleGraph,
+    setNodes,
+    clearGraph,
+    edges: allEdges = [],
   } = useGraph();
+
+  const [nodeCount, setNodeCount] = useState(5);
 
   if (!isMenuOpen) return null;
 
+  const createRandomGraph = () => {
+    const newNodes = [];
+    const canvas = document.querySelector('svg');
+    if (!canvas) {
+      alert('SVG canvas không tìm thấy!');
+      return;
+    }
+
+    // Lấy kích thước từ parent container
+    const parent = canvas.parentElement;
+    let canvasWidth = parent?.clientWidth || 0;
+    let canvasHeight = parent?.clientHeight || 0;
+    
+    console.log('Parent size:', canvasWidth, 'x', canvasHeight);
+    console.log('Canvas attributes - width:', canvas.getAttribute('width'), 'height:', canvas.getAttribute('height'));
+    
+    // Nếu parent không có kích thước, lấy từ canvas element
+    if (!canvasWidth || !canvasHeight) {
+      const rect = canvas.getBoundingClientRect();
+      canvasWidth = rect.width;
+      canvasHeight = rect.height;
+      console.log('Using canvas BoundingClientRect:', canvasWidth, 'x', canvasHeight);
+    }
+    
+    // Fallback - sử dụng window size
+    if (!canvasWidth || canvasWidth <= 0) {
+      canvasWidth = window.innerWidth - 350; // Trừ sidebar
+    }
+    if (!canvasHeight || canvasHeight <= 0) {
+      canvasHeight = window.innerHeight - 100; // Trừ header
+    }
+    
+    console.log('Final canvas size:', canvasWidth, 'x', canvasHeight);
+    
+    const NODE_RADIUS = 20;
+    const padding = 50; // Lớn hơn để tránh mép
+    
+    // Kiểm tra vùng sinh điểm có hợp lệ không
+    const availableWidth = canvasWidth - 2 * padding;
+    const availableHeight = canvasHeight - 2 * padding;
+    
+    console.log('Available space for nodes:', availableWidth, 'x', availableHeight);
+    
+    if (availableWidth <= 0 || availableHeight <= 0) {
+      console.error('Canvas quá nhỏ để sinh điểm!');
+      alert('Canvas quá nhỏ! Vui lòng mở rộng cửa sổ trình duyệt.');
+      return;
+    }
+    
+    // Điều chỉnh minDistance dựa trên số lượng nodes
+    let minDistance = NODE_RADIUS * 2.5;
+    if (nodeCount > 10) minDistance = NODE_RADIUS * 1.8;
+    if (nodeCount > 15) minDistance = NODE_RADIUS * 1.3;
+
+    console.log('Creating', nodeCount, 'nodes with minDistance:', minDistance);
+
+    const generatePoint = (attempts = 0) => {
+      if (attempts > 500) {
+        const point = {
+          x: padding + Math.random() * availableWidth,
+          y: padding + Math.random() * availableHeight,
+        };
+        console.log('Fallback point:', point);
+        return point;
+      }
+      
+      const point = {
+        x: padding + Math.random() * availableWidth,
+        y: padding + Math.random() * availableHeight,
+      };
+
+      const isFarEnough = newNodes.every((node) => {
+        const dx = point.x - node.x;
+        const dy = point.y - node.y;
+        const distance = Math.sqrt(dx * dx + dy * dy);
+        return distance >= minDistance;
+      });
+
+      return isFarEnough ? point : generatePoint(attempts + 1);
+    };
+
+    for (let i = 0; i < nodeCount; i++) {
+      const point = generatePoint();
+      if (point) {
+        newNodes.push({
+          id: i,
+          x: point.x,
+          y: point.y,
+          label: `V${i}`,
+        });
+        console.log(`Node ${i}: x=${point.x.toFixed(0)}, y=${point.y.toFixed(0)}`);
+      }
+    }
+
+    console.log('Total nodes created:', newNodes.length);
+    setNodes(newNodes);
+  };
+
   return (
-    <aside className="w-80 bg-black bg-opacity-40 backdrop-blur-md border-r border-purple-500/30 overflow-y-auto">
-      <div className="p-6 space-y-6">
-        {/* Thông tin đồ thị */}
-        <div className="bg-gradient-to-br from-purple-500/10 to-pink-500/10 rounded-xl p-4 border border-purple-500/30">
-          <div className="flex items-center gap-2 mb-3">
-            <Activity className="text-purple-400" size={20} />
-            <h3 className="text-lg font-semibold text-purple-300">Thông Tin</h3>
-          </div>
-          
-          <div className="space-y-2 text-sm">
-            <div className="flex justify-between">
-              <span className="text-gray-400">Số đỉnh:</span>
-              <span className="text-white font-semibold">{nodes.length}</span>
+    <aside className="sidebar">
+      <div className="sidebar__content">
+        {/* Graph Information */}
+        <Card
+          title="Thông Tin"
+          icon={Activity}
+          variant="primary"
+          collapsible
+          defaultOpen
+        >
+          <div className="sidebar__stats">
+            <div className="sidebar__stat-item">
+              <span className="sidebar__stat-label">Số đỉnh:</span>
+              <span className="sidebar__stat-value">{nodes.length}</span>
             </div>
-            <div className="flex justify-between">
-              <span className="text-gray-400">Cạnh MST:</span>
-              <span className="text-white font-semibold">{mstEdges.length}</span>
+            <div className="sidebar__stat-item">
+              <span className="sidebar__stat-label">Số cạnh:</span>
+              <span className="sidebar__stat-value">{allEdges.length}</span>
             </div>
-            <div className="flex justify-between">
-              <span className="text-gray-400">Tổng chi phí:</span>
-              <span className="text-green-400 font-bold">
-                {pixelsToKm(totalCost)} km
+            <div className="sidebar__stat-item">
+              <span className="sidebar__stat-label">Cạnh MST:</span>
+              <span className="sidebar__stat-value">{mstEdges.length}</span>
+            </div>
+            <div className="sidebar__stat-item highlight">
+              <span className="sidebar__stat-label">Tổng chi phí:</span>
+              <span className="sidebar__stat-value cost">
+                {pixelsToKm(totalCost, distanceScale)} km
               </span>
             </div>
           </div>
-        </div>
+        </Card>
 
-        {/* Đồ thị mẫu */}
-        <div className="bg-gradient-to-br from-blue-500/10 to-cyan-500/10 rounded-xl p-4 border border-blue-500/30">
-          <div className="flex items-center gap-2 mb-3">
-            <Network className="text-blue-400" size={20} />
-            <h3 className="text-lg font-semibold text-blue-300">Đồ Thị Mẫu</h3>
+        {/* Settings */}
+        <Card
+          title="Cài Đặt Đồ Thị"
+          icon={Plus}
+          variant="secondary"
+          collapsible
+          defaultOpen
+        >
+          <div className="sidebar__settings">
+            <div className="sidebar__input-group">
+              <label className="sidebar__input-label">Số đỉnh:</label>
+              <input
+                type="number"
+                min="3"
+                max="20"
+                value={nodeCount}
+                onChange={(e) => setNodeCount(Math.max(3, parseInt(e.target.value) || 3))}
+                className="sidebar__input"
+              />
+            </div>
+
+            <div className="sidebar__input-group">
+              <label className="sidebar__input-label">
+                Tỷ lệ (km/pixel): {distanceScale}
+              </label>
+              <input
+                type="range"
+                min="0.1"
+                max="2"
+                step="0.1"
+                value={distanceScale}
+                onChange={(e) => setDistanceScale(parseFloat(e.target.value))}
+                className="sidebar__input"
+              />
+              <small className="sidebar__helper">
+                Ví dụ: 0.5 km/pixel = 1 pixel = 0.5 km
+              </small>
+            </div>
+
+            <Button
+              variant="primary"
+              size="md"
+              onClick={createRandomGraph}
+              className="sidebar__full-btn"
+            >
+              Tạo Ngẫu Nhiên
+            </Button>
+
+            <Button
+              variant="danger"
+              size="md"
+              onClick={clearGraph}
+              className="sidebar__full-btn"
+            >
+              Xóa Tất Cả
+            </Button>
           </div>
-          
-          <div className="space-y-2">
-            <button
+        </Card>
+
+        {/* Sample Graphs */}
+        <Card
+          title="Đồ Thị Mẫu"
+          icon={Network}
+          variant="secondary"
+          collapsible
+          defaultOpen
+        >
+          <div className="sidebar__buttons">
+            <Button
+              variant="secondary"
+              size="md"
               onClick={() => loadSampleGraph(sampleGraphs.small)}
-              className="w-full px-4 py-2 bg-blue-500/20 hover:bg-blue-500/30 text-blue-300 rounded-lg transition-all text-sm"
+              className="sidebar__full-btn"
             >
-              Đồ thị nhỏ (5 đỉnh)
-            </button>
-            <button
+              Nhỏ (5 đỉnh)
+            </Button>
+            <Button
+              variant="secondary"
+              size="md"
               onClick={() => loadSampleGraph(sampleGraphs.medium)}
-              className="w-full px-4 py-2 bg-blue-500/20 hover:bg-blue-500/30 text-blue-300 rounded-lg transition-all text-sm"
+              className="sidebar__full-btn"
             >
-              Đồ thị trung bình (8 đỉnh)
-            </button>
-            <button
+              Trung bình (8 đỉnh)
+            </Button>
+            <Button
+              variant="secondary"
+              size="md"
               onClick={() => loadSampleGraph(sampleGraphs.circle)}
-              className="w-full px-4 py-2 bg-blue-500/20 hover:bg-blue-500/30 text-blue-300 rounded-lg transition-all text-sm"
+              className="sidebar__full-btn"
             >
-              Đồ thị tròn (12 đỉnh)
-            </button>
-            <button
+              Tròn (12 đỉnh)
+            </Button>
+            <Button
+              variant="secondary"
+              size="md"
               onClick={() => loadSampleGraph(sampleGraphs.grid)}
-              className="w-full px-4 py-2 bg-blue-500/20 hover:bg-blue-500/30 text-blue-300 rounded-lg transition-all text-sm"
+              className="sidebar__full-btn"
             >
-              Đồ thị lưới (9 đỉnh)
-            </button>
+              Lưới (9 đỉnh)
+            </Button>
           </div>
-        </div>
+        </Card>
 
-        {/* Thành phố Việt Nam */}
-        <div className="bg-gradient-to-br from-emerald-500/10 to-teal-500/10 rounded-xl p-4 border border-emerald-500/30">
-          <div className="flex items-center gap-2 mb-3">
-            <MapPin className="text-emerald-400" size={20} />
-            <h3 className="text-lg font-semibold text-emerald-300">Việt Nam</h3>
-          </div>
-          
-          <button
-            onClick={() => loadSampleGraph(vietnamCities)}
-            className="w-full px-4 py-2 bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 rounded-lg transition-all text-sm"
+        {/* MST Edges Info */}
+        {mstEdges.length > 0 && (
+          <Card
+            title="Cạnh MST"
+            variant="primary"
+            collapsible
+            defaultOpen
           >
-            Các thành phố lớn
-          </button>
-        </div>
-
-        {/* Hướng dẫn */}
-        <div className="bg-gradient-to-br from-amber-500/10 to-orange-500/10 rounded-xl p-4 border border-amber-500/30">
-          <div className="flex items-center gap-2 mb-3">
-            <Info className="text-amber-400" size={20} />
-            <h3 className="text-lg font-semibold text-amber-300">Hướng Dẫn</h3>
-          </div>
-          
-          <ul className="space-y-2 text-sm text-gray-300">
-            <li className="flex gap-2">
-              <span className="text-amber-400">•</span>
-              <span>Click vào canvas để thêm điểm</span>
-            </li>
-            <li className="flex gap-2">
-              <span className="text-amber-400">•</span>
-              <span>Nhấn "Tìm MST" để tìm đường tối ưu</span>
-            </li>
-            <li className="flex gap-2">
-              <span className="text-amber-400">•</span>
-              <span>Chọn đồ thị mẫu để xem demo</span>
-            </li>
-          </ul>
-        </div>
+            <div className="sidebar__edges-list">
+              {mstEdges.map((edge, idx) => (
+                <div key={idx} className="sidebar__edge-item">
+                  <span className="sidebar__edge-label">
+                    {edge.from} → {edge.to}
+                  </span>
+                  <span className="sidebar__edge-weight">
+                    {pixelsToKm(edge.weight)} km
+                  </span>
+                </div>
+              ))}
+            </div>
+          </Card>
+        )}
       </div>
     </aside>
   );

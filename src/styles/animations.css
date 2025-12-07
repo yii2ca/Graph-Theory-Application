@@ -1,8 +1,8 @@
 /**
- * CSS Animations
+ * CSS Animations cho Railway MST Application
  */
 
-/* Fade in animation */
+/* === FADE ANIMATIONS === */
 @keyframes fadeIn {
   from {
     opacity: 0;
@@ -12,14 +12,73 @@
   }
 }
 
-.animate-fade-in {
-  animation: fadeIn 0.5s ease-out forwards;
+@keyframes fadeOut {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
 }
 
-/* Scale in animation */
+.animate-fade-in {
+  animation: fadeIn var(--transition-base);
+}
+
+.animate-fade-out {
+  animation: fadeOut var(--transition-base);
+}
+
+/* === SLIDE ANIMATIONS === */
+@keyframes slideInRight {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes slideOutRight {
+  from {
+    transform: translateX(0);
+    opacity: 1;
+  }
+  to {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+}
+
+@keyframes slideInDown {
+  from {
+    transform: translateY(-100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.animate-slide-in-right {
+  animation: slideInRight var(--transition-base);
+}
+
+.animate-slide-out-right {
+  animation: slideOutRight var(--transition-base);
+}
+
+.animate-slide-in-down {
+  animation: slideInDown var(--transition-base);
+}
+
+/* === SCALE ANIMATIONS === */
 @keyframes scaleIn {
   from {
-    transform: scale(0);
+    transform: scale(0.9);
     opacity: 0;
   }
   to {
@@ -28,8 +87,112 @@
   }
 }
 
+@keyframes scaleOut {
+  from {
+    transform: scale(1);
+    opacity: 1;
+  }
+  to {
+    transform: scale(0.9);
+    opacity: 0;
+  }
+}
+
 .animate-scale-in {
-  animation: scaleIn 0.3s ease-out forwards;
+  animation: scaleIn var(--transition-base);
+}
+
+.animate-scale-out {
+  animation: scaleOut var(--transition-base);
+}
+
+/* === COLLAPSE/EXPAND ANIMATIONS === */
+@keyframes expandHeight {
+  from {
+    height: 0;
+    opacity: 0;
+    overflow: hidden;
+  }
+  to {
+    height: auto;
+    opacity: 1;
+    overflow: visible;
+  }
+}
+
+@keyframes collapseHeight {
+  from {
+    height: auto;
+    opacity: 1;
+    overflow: hidden;
+  }
+  to {
+    height: 0;
+    opacity: 0;
+    overflow: hidden;
+  }
+}
+
+.animate-expand-height {
+  animation: expandHeight var(--transition-base);
+}
+
+.animate-collapse-height {
+  animation: collapseHeight var(--transition-base);
+}
+
+/* === LOADING ANIMATIONS === */
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+@keyframes bounce {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-4px);
+  }
+}
+
+.animate-spin {
+  animation: spin 1s linear infinite;
+}
+
+.animate-pulse {
+  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+.animate-bounce {
+  animation: bounce 1s infinite;
+}
+
+/* === GLOW ANIMATIONS === */
+@keyframes pulseGlow {
+  0%, 100% {
+    box-shadow: 0 0 0 0 rgba(139, 92, 246, 0.7);
+  }
+  50% {
+    box-shadow: 0 0 0 10px rgba(139, 92, 246, 0);
+  }
+}
+
+.animate-pulse-glow {
+  animation: pulseGlow 2s infinite;
 }
 
 /* Draw line animation */

@@ -1,42 +1,66 @@
-import React from 'react';
+import React, { useState } from 'react';
+import './Card.css';
+import { ChevronDown } from 'lucide-react';
 
 /**
- * Card component - Container với gradient và border
+ * Card Component - Container với gradient và border
+ * Props: title, children, collapsible, icon, variant, className
  */
-const Card = ({ 
-  children, 
-  title, 
+const Card = React.forwardRef(({
+  children,
+  title,
   icon: Icon,
-  gradient = 'purple',
-  className = ''
-}) => {
-  const gradients = {
-    purple: 'from-purple-500/10 to-pink-500/10 border-purple-500/30',
-    blue: 'from-blue-500/10 to-cyan-500/10 border-blue-500/30',
-    green: 'from-green-500/10 to-emerald-500/10 border-emerald-500/30',
-    amber: 'from-amber-500/10 to-orange-500/10 border-amber-500/30'
+  collapsible = false,
+  defaultOpen = true,
+  variant = 'primary',
+  className = '',
+  onToggle,
+  ...props
+}, ref) => {
+  const [isOpen, setIsOpen] = useState(defaultOpen);
+
+  const handleToggle = () => {
+    const newState = !isOpen;
+    setIsOpen(newState);
+    onToggle?.(newState);
   };
 
+  const cardClass = `card card--${variant} ${className}`.trim();
+  const contentClass = `card__content ${isOpen ? 'card__content--open' : 'card__content--closed'}`;
+
   return (
-    <div className={`
-      bg-gradient-to-br ${gradients[gradient]}
-      rounded-xl p-4 border backdrop-blur-sm
-      ${className}
-    `}>
-      {(title || Icon) && (
-        <div className="flex items-center gap-2 mb-3">
-          {Icon && <Icon className="text-current" size={20} />}
-          {title && (
-            <h3 className="text-lg font-semibold text-current">{title}</h3>
+    <div ref={ref} className={cardClass} {...props}>
+      {(title || Icon || collapsible) && (
+        <div
+          className={`card__header ${collapsible ? 'card__header--collapsible' : ''}`}
+          onClick={collapsible ? handleToggle : undefined}
+        >
+          <div className="card__header-content">
+            {Icon && <Icon className="card__icon" size={20} />}
+            {title && <h3 className="card__title">{title}</h3>}
+          </div>
+          {collapsible && (
+            <ChevronDown
+              className={`card__chevron ${isOpen ? 'card__chevron--open' : ''}`}
+              size={20}
+            />
           )}
         </div>
       )}
-      
-      <div>
-        {children}
-      </div>
+
+      {collapsible ? (
+        <div className={contentClass}>
+          {children}
+        </div>
+      ) : (
+        <div className="card__body">
+          {children}
+        </div>
+      )}
     </div>
   );
-};
+});
+
+Card.displayName = 'Card';
 
 export default Card;

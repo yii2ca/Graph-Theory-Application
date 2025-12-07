@@ -32,6 +32,13 @@ export const GraphProvider = ({ children }) => {
   
   // State cho menu
   const [isMenuOpen, setIsMenuOpen] = useState(true);
+  
+  // State cho thuật toán MST (Kruskal hoặc Prim)
+  const [algorithm, setAlgorithm] = useState('kruskal');
+  
+  // State cho tỷ lệ chuyển đổi pixel → km (tỷ lệ = km/pixel)
+  // Mặc định: 1 pixel = 0.5 km
+  const [distanceScale, setDistanceScale] = useState(0.5);
 
   /**
    * Thêm node mới vào đồ thị
@@ -63,6 +70,28 @@ export const GraphProvider = ({ children }) => {
       label: `V${nodes.length}`
     };
     setNodes([...nodes, newNode]);
+  };
+
+  /**
+   * Xóa một node theo ID
+   * @param {number} nodeId - ID của node cần xóa
+   */
+  const removeNode = (nodeId) => {
+    setNodes(nodes.filter(n => n.id !== nodeId));
+    // Cũng xóa tất cả edges liên quan đến node này
+    setEdges(edges.filter(e => e.from !== nodeId && e.to !== nodeId));
+    setMstEdges(mstEdges.filter(e => e.from !== nodeId && e.to !== nodeId));
+  };
+
+  /**
+   * Cập nhật tên (label) của node
+   * @param {number} nodeId - ID của node
+   * @param {string} newLabel - Tên mới
+   */
+  const updateNodeLabel = (nodeId, newLabel) => {
+    setNodes(nodes.map(node => 
+      node.id === nodeId ? { ...node, label: newLabel } : node
+    ));
   };
 
   /**
@@ -131,13 +160,19 @@ export const GraphProvider = ({ children }) => {
     isAnimating,
     totalCost,
     isMenuOpen,
+    algorithm,
+    distanceScale,
     setNodes,
     setEdges,
     setMstEdges,
     setIsAnimating,
     setTotalCost,
     setIsMenuOpen,
+    setAlgorithm,
+    setDistanceScale,
     addNode,
+    removeNode,
+    updateNodeLabel,
     clearGraph,
     loadSampleGraph,
     updateNodePosition,

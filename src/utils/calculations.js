@@ -59,12 +59,13 @@ export const formatNumber = (num, decimals = 2) => {
 };
 
 /**
- * Chuyển đổi pixel sang km (giả định cho demo)
+ * Chuyển đổi pixel sang km với tỷ lệ tùy chỉnh
  * @param {number} pixels - Khoảng cách pixel
+ * @param {number} scale - Tỷ lệ chuyển đổi (km/pixel), mặc định 0.5
  * @returns {number} - Khoảng cách km
  */
-export const pixelsToKm = (pixels) => {
-  return (pixels * 0.5).toFixed(1);
+export const pixelsToKm = (pixels, scale = 0.5) => {
+  return (pixels * scale).toFixed(1);
 };
 
 /**

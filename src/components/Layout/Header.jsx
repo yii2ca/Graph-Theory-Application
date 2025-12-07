@@ -1,122 +1,137 @@
-import React from 'react';
-import { Menu, Play, Trash2, Plus } from 'lucide-react';
+import React, { useState } from 'react';
+import { Menu, X, HelpCircle, Train } from 'lucide-react';
 import { useGraph } from '../../contexts/GraphContext';
 import { useMST } from '../../hooks/useMST';
-import { sampleGraphs } from '../../data/sampleGraphs';
+import { Button } from '../UI';
+import Modal from '../UI/Modal';
+import './Header.css';
 
-/**
- * Header component với controls chính
- */
 const Header = () => {
   const {
     nodes,
     isMenuOpen,
     setIsMenuOpen,
-    clearGraph,
-    loadSampleGraph,
+    algorithm = 'kruskal',
+    setAlgorithm,
     setMstEdges,
     setTotalCost,
-    setNodes,
-    rearrangeNodes
   } = useGraph();
 
   const { findMST, isAnimating } = useMST(nodes, setMstEdges, setTotalCost);
+  const [isHelpOpen, setIsHelpOpen] = useState(false);
 
   return (
-    <header className="bg-black bg-opacity-40 backdrop-blur-md border-b border-purple-500/30 p-4 flex items-center justify-between">
-      {/* Logo và Title */}
-      <div className="flex items-center gap-3">
-        <button
-          onClick={() => setIsMenuOpen(!isMenuOpen)}
-          className="p-2 hover:bg-purple-500/20 rounded-lg transition-all"
-          aria-label="Toggle menu"
-        >
-          <Menu className="text-purple-300" size={24} />
-        </button>
-        
-        <div>
-          <h1 className="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-400">
-            Hệ Thống Đường Tối Ưu
-          </h1>
-          <p className="text-purple-300 text-sm">
-            Minimum Spanning Tree Visualization
-          </p>
+    <>
+      <header className="header">
+        <div className="header__left">
+          <button
+            onClick={() => setIsMenuOpen(!isMenuOpen)}
+            className="header__menu-btn"
+            aria-label="Toggle menu"
+          >
+            {isMenuOpen ? <X size={24} /> : <Menu size={24} />}
+          </button>
+
+          <div className="header__logo">
+            <Train size={28} />
+            <div className="header__branding">
+              <h1 className="header__title">Hệ Thống Đường Sắt Tối Ưu</h1>
+              <p className="header__subtitle">Minimum Spanning Tree Visualization</p>
+            </div>
+          </div>
         </div>
-      </div>
 
-      {/* Action Buttons */}
-      <div className="flex gap-2">
-        <button
-          onClick={() => {
-            const svg = document.querySelector('svg');
-            if (svg) {
-              const rect = svg.getBoundingClientRect();
-              const NODE_RADIUS = 20;
-              const paddingTop = 120;   // Tránh header (cao ~80px) + khoảng cách an toàn
-              const paddingLeft = 120;  // Tránh sidebar (nếu có) + khoảng cách
-              const paddingRight = 80;  // Tránh cạnh phải
-              const paddingBottom = 80; // Tránh cạnh dưới
-              // Khoảng cách tối thiểu giữa 2 tâm = 2.5 * bán kính
-              const minDistance = NODE_RADIUS * 2.5;
-              
-              const generatePoint = () => {
-                for (let i = 0; i < 100; i++) {
-                  const point = {
-                    x: paddingLeft + Math.random() * (rect.width - paddingLeft - paddingRight),
-                    y: paddingTop + Math.random() * (rect.height - paddingTop - paddingBottom)
-                  };
-                  
-                  // Kiểm tra khoảng cách từ tâm này đến tâm các điểm khác
-                  const isFarEnough = nodes.every(node => {
-                    const dx = point.x - node.x;
-                    const dy = point.y - node.y;
-                    const distance = Math.sqrt(dx * dx + dy * dy);
-                    return distance >= minDistance;
-                  });
-                  
-                  if (isFarEnough) return point;
-                }
-                return null;
-              };
-              
-              const point = generatePoint();
-              if (point) {
-                const newNode = {
-                  id: nodes.length,
-                  x: point.x,
-                  y: point.y,
-                  label: `V${nodes.length}`
-                };
-                setNodes([...nodes, newNode]);
-              } else {
-                alert('Không tìm được vị trí phù hợp! Canvas đã quá đông.');
-              }
-            }
-          }}
-          className="px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg transition-all flex items-center gap-2"
-        >
-          <Plus size={18} />
-          Thêm điểm
-        </button>
+        <div className="header__center">
+          <div className="header__algorithm-group">
+            <label className="header__label">Thuật toán:</label>
+            <select
+              value={algorithm}
+              onChange={(e) => setAlgorithm?.(e.target.value)}
+              className="header__select"
+            >
+              <option value="kruskal">Kruskal</option>
+              <option value="prim">Prim</option>
+            </select>
+          </div>
+        </div>
 
-        <button
-          onClick={findMST}
-          disabled={nodes.length < 2 || isAnimating}
-          className="px-4 py-2 bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white rounded-lg transition-all flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
-        >
-          <Play size={18} />
-          {isAnimating ? 'Đang tính...' : 'Tìm MST'}
-        </button>
+        <div className="header__right">
+          <Button
+            variant="success"
+            size="md"
+            onClick={() => {
+              findMST(algorithm);
+            }}
+            loading={isAnimating}
+          >
+            ▶ Thực thi
+          </Button>
 
-        <button
-          onClick={clearGraph}
-          className="px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg transition-all flex items-center gap-2"
-        >
-          <Trash2 size={18} />
-          Xóa hết
-        </button>
-      </div>
-    </header>
+          <Button
+            variant="secondary"
+            size="md"
+            icon={HelpCircle}
+            onClick={() => setIsHelpOpen(true)}
+          >
+            Hướng dẫn
+          </Button>
+        </div>
+      </header>
+
+      <Modal
+        isOpen={isHelpOpen}
+        onClose={() => setIsHelpOpen(false)}
+        title="📖 Hướng Dẫn Sử Dụng"
+        size="lg"
+      >
+        <div className="help-content">
+          <div className="help-section">
+            <h3>🎯 Cách Sử Dụng:</h3>
+            <ul>
+              <li><strong>Tạo đồ thị mẫu:</strong> Chọn từ danh sách "Đồ Thị Mẫu" ở Sidebar</li>
+              <li><strong>Tạo ngẫu nhiên:</strong> Nhập số đỉnh (3-20) và ấn "Tạo Ngẫu Nhiên"</li>
+              <li><strong>Thêm đỉnh:</strong> Click trực tiếp lên canvas để thêm điểm</li>
+              <li><strong>Kéo đỉnh:</strong> Click và kéo một đỉnh để di chuyển vị trí</li>
+              <li><strong>Đổi tên đỉnh:</strong> Double-click vào đỉnh, nhập tên mới, ấn "Lưu"</li>
+              <li><strong>Xóa đỉnh:</strong> Right-click vào đỉnh để xóa ngay lập tức</li>
+              <li><strong>Xóa tất cả:</strong> Ấn nút "Xóa Tất Cả" ở Sidebar</li>
+            </ul>
+          </div>
+
+          <div className="help-section">
+            <h3>🔄 Thuật Toán MST:</h3>
+            <ul>
+              <li><strong>Kruskal:</strong> Sắp xếp tất cả cạnh theo trọng số từ nhỏ đến lớn, lần lượt thêm cạnh nếu không tạo chu trình. Tốt cho đồ thị thưa.</li>
+              <li><strong>Prim:</strong> Bắt đầu từ một đỉnh, lần lượt thêm cạnh nhỏ nhất từ cây hiện tại tới đỉnh chưa thêm. Tốt cho đồ thị dày đặc.</li>
+              <li><strong>Kết quả:</strong> Cả hai thuật toán đều cho MST tối ưu với tổng trọng số nhỏ nhất</li>
+            </ul>
+          </div>
+
+          <div className="help-section">
+            <h3>❓ Minimum Spanning Tree (MST) là gì?</h3>
+            <p>
+              MST là tập hợp cạnh kết nối tất cả đỉnh trong đồ thị với:
+              <ul>
+                <li>✓ Không tạo chu trình (Acyclic)</li>
+                <li>✓ Tổng trọng số nhỏ nhất (Minimal)</li>
+                <li>✓ Kết nối mọi đỉnh (Spanning)</li>
+              </ul>
+              <strong>Ứng dụng:</strong> Thiết kế mạng lưới, đường sắt, điện thoại với chi phí tối thiểu
+            </p>
+          </div>
+
+          <div className="help-section">
+            <h3>💡 Mẹo sử dụng:</h3>
+            <ul>
+              <li>Chọn "Kruskal" hoặc "Prim" từ dropdown "Thuật toán" trước khi thực thi</li>
+              <li>Ấn "Thực thi" để chạy thuật toán và hiển thị MST (cạnh xanh lá)</li>
+              <li>Xem "Thông Tin" ở Sidebar để theo dõi số đỉnh, cạnh, và tổng chi phí</li>
+              <li>Double-click để đổi tên, Right-click để xóa - rất tiện!</li>
+            </ul>
+          </div>
+        </div>
+      </Modal>
+    </>
   );
 };
 

@@ -1,51 +1,50 @@
 import React from 'react';
+import './Button.css';
 
 /**
- * Button component - Reusable button với nhiều variants
+ * Reusable Button Component
+ * Variants: primary, secondary, danger, ghost, success
+ * Sizes: sm, md, lg
+ * States: default, hover, active, disabled, loading
  */
-const Button = ({ 
-  children, 
-  onClick, 
-  variant = 'primary', 
+const Button = React.forwardRef(({
+  children,
+  variant = 'primary',
   size = 'md',
   disabled = false,
+  loading = false,
   icon: Icon,
-  className = ''
-}) => {
-  const baseStyles = 'rounded-lg transition-all flex items-center gap-2 font-medium';
-  
-  const variants = {
-    primary: 'bg-purple-600 hover:bg-purple-700 text-white',
-    secondary: 'bg-gray-600 hover:bg-gray-700 text-white',
-    success: 'bg-green-600 hover:bg-green-700 text-white',
-    danger: 'bg-red-600 hover:bg-red-700 text-white',
-    outline: 'border-2 border-purple-500 text-purple-300 hover:bg-purple-500/20'
-  };
-
-  const sizes = {
-    sm: 'px-3 py-1.5 text-sm',
-    md: 'px-4 py-2 text-base',
-    lg: 'px-6 py-3 text-lg'
-  };
-
-  const disabledStyles = 'opacity-50 cursor-not-allowed';
+  iconPosition = 'left',
+  className = '',
+  type = 'button',
+  onClick,
+  ...props
+}, ref) => {
+  const buttonClass = `btn btn--${variant} btn--${size} ${disabled ? 'btn--disabled' : ''} ${loading ? 'btn--loading' : ''} ${className}`.trim();
 
   return (
     <button
+      ref={ref}
+      type={type}
+      className={buttonClass}
+      disabled={disabled || loading}
       onClick={onClick}
-      disabled={disabled}
-      className={`
-        ${baseStyles}
-        ${variants[variant]}
-        ${sizes[size]}
-        ${disabled ? disabledStyles : ''}
-        ${className}
-      `}
+      {...props}
     >
-      {Icon && <Icon size={18} />}
-      {children}
+      <span className="btn__content">
+        {Icon && iconPosition === 'left' && <Icon className="btn__icon" size={16} />}
+        {children && <span className="btn__text">{children}</span>}
+        {Icon && iconPosition === 'right' && <Icon className="btn__icon" size={16} />}
+      </span>
+      {loading && (
+        <span className="btn__loader">
+          <span className="loader"></span>
+        </span>
+      )}
     </button>
   );
-};
+});
+
+Button.displayName = 'Button';
 
 export default Button;

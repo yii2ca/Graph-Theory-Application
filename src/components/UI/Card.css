@@ -1,0 +1,224 @@
+/* Card Component Styles */
+
+.card {
+  border-radius: var(--radius-xl);
+  border: 1px solid var(--color-border);
+  overflow: hidden;
+  background: linear-gradient(135deg, 
+    rgba(139, 92, 246, 0.05) 0%, 
+    rgba(236, 72, 153, 0.05) 100%
+  );
+  backdrop-filter: blur(10px);
+  box-shadow: var(--shadow-sm);
+  transition: all var(--transition-base);
+}
+
+.card:hover {
+  box-shadow: var(--shadow-md);
+  border-color: var(--color-primary-light);
+}
+
+/* === CARD VARIANTS === */
+
+/* Primary Card */
+.card--primary {
+  border-color: rgba(139, 92, 246, 0.3);
+  background: linear-gradient(135deg,
+    rgba(139, 92, 246, 0.08) 0%,
+    rgba(236, 72, 153, 0.08) 100%
+  );
+}
+
+.card--primary:hover {
+  border-color: var(--color-primary-light);
+}
+
+/* Secondary Card */
+.card--secondary {
+  border-color: rgba(59, 130, 246, 0.3);
+  background: linear-gradient(135deg,
+    rgba(59, 130, 246, 0.08) 0%,
+    rgba(34, 211, 238, 0.08) 100%
+  );
+}
+
+.card--secondary:hover {
+  border-color: var(--color-info);
+}
+
+/* Success Card */
+.card--success {
+  border-color: rgba(16, 185, 129, 0.3);
+  background: linear-gradient(135deg,
+    rgba(16, 185, 129, 0.08) 0%,
+    rgba(34, 197, 94, 0.08) 100%
+  );
+}
+
+.card--success:hover {
+  border-color: var(--color-success);
+}
+
+/* Danger Card */
+.card--danger {
+  border-color: rgba(239, 68, 68, 0.3);
+  background: linear-gradient(135deg,
+    rgba(239, 68, 68, 0.08) 0%,
+    rgba(252, 165, 165, 0.08) 100%
+  );
+}
+
+.card--danger:hover {
+  border-color: var(--color-danger);
+}
+
+/* === CARD HEADER === */
+.card__header {
+  padding: var(--spacing-4);
+  border-bottom: 1px solid var(--color-border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--spacing-3);
+}
+
+.card__header--collapsible {
+  cursor: pointer;
+  user-select: none;
+  transition: background-color var(--transition-base);
+}
+
+.card__header--collapsible:hover {
+  background-color: rgba(139, 92, 246, 0.05);
+}
+
+.card__header-content {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-3);
+  flex: 1;
+  min-width: 0;
+}
+
+.card__icon {
+  flex-shrink: 0;
+  color: var(--color-primary);
+  width: 20px;
+  height: 20px;
+}
+
+.card__title {
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-primary);
+  margin: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.card__chevron {
+  flex-shrink: 0;
+  color: var(--color-text-secondary);
+  width: 20px;
+  height: 20px;
+  transition: transform var(--transition-base);
+}
+
+.card__chevron--open {
+  transform: rotate(180deg);
+}
+
+/* === CARD BODY === */
+.card__body {
+  padding: var(--spacing-4);
+}
+
+/* === COLLAPSIBLE CONTENT === */
+.card__content {
+  max-height: 0;
+  overflow: hidden;
+  opacity: 0;
+  transition: all var(--transition-base);
+}
+
+.card__content--open {
+  max-height: 2000px;
+  opacity: 1;
+  padding: var(--spacing-4);
+  border-top: 1px solid var(--color-border);
+}
+
+.card__content--closed {
+  max-height: 0;
+  opacity: 0;
+  padding: 0;
+}
+
+/* === CARD SECTIONS === */
+.card__section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-3);
+  padding-bottom: var(--spacing-3);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.card__section:last-child {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+.card__section-title {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin: 0;
+}
+
+/* === CARD LIST === */
+.card__list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-2);
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.card__list-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--spacing-2) 0;
+  border-bottom: 1px solid var(--color-border);
+  font-size: var(--font-size-sm);
+}
+
+.card__list-item:last-child {
+  border-bottom: none;
+}
+
+.card__list-label {
+  color: var(--color-text-secondary);
+}
+
+.card__list-value {
+  color: var(--color-text-primary);
+  font-weight: var(--font-weight-semibold);
+}
+
+/* === CARD ACTIONS === */
+.card__actions {
+  display: flex;
+  gap: var(--spacing-2);
+  padding-top: var(--spacing-3);
+  border-top: 1px solid var(--color-border);
+  margin-top: var(--spacing-3);
+}
+
+.card__actions button {
+  flex: 1;
+}
