@@ -73,7 +73,8 @@ export const GraphProvider = ({ children }) => {
     // Tạo cạnh kết nối node mới với tất cả các node hiện tại
     const newEdges = nodes.map(existingNode => ({
       from: existingNode.id,
-      to: newNode.id
+      to: newNode.id,
+      isCurved: false
     }));
     
     setNodes([...nodes, newNode]);
@@ -190,11 +191,13 @@ export const GraphProvider = ({ children }) => {
   const loadSampleGraph = (sampleNodes) => {
     // Tạo tất cả các cạnh có thể cho đồ thị đầy đủ
     const allEdges = [];
+    
     for (let i = 0; i < sampleNodes.length; i++) {
       for (let j = i + 1; j < sampleNodes.length; j++) {
         allEdges.push({
           from: sampleNodes[i].id,
-          to: sampleNodes[j].id
+          to: sampleNodes[j].id,
+          isCurved: false
         });
       }
     }

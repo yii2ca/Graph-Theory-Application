@@ -462,6 +462,7 @@ const MapCanvas = forwardRef((props, ref) => {
                 isMst={false}
                 isDefault={!edge.isCurved}
                 isCurved={edge.isCurved || false}
+                curveDirection={edge.curveDirection || 1}
                 weight={distance}
                 distanceScale={distanceScale}
               />

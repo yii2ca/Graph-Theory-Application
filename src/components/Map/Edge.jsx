@@ -4,26 +4,26 @@ import { getMidPoint, pixelsToKm } from '../../utils/calculations';
 /**
  * Edge component - Đại diện cho một cạnh trong đồ thị
  */
-const Edge = ({ from, to, isMst, isDefault, isCurved = false, weight, distanceScale = 0.5, animationDelay = 0 }) => {
+const Edge = ({ from, to, isMst, isDefault, isCurved = false, curveDirection = 1, weight, distanceScale = 0.5, animationDelay = 0 }) => {
   const midPoint = getMidPoint(from, to);
   
   // Màu và độ dày
   const strokeColor = isMst ? '#10b981' : isDefault ? '#374151' : isCurved ? '#8b5cf6' : '#6b7280';
   const strokeWidth = isMst ? 4 : isDefault ? 1 : isCurved ? 3 : 2;
-  const opacity = isMst ? 1 : isDefault ? 0.2 : isCurved ? 0.8 : 0.5;
+  const opacity = isMst ? 1 : isDefault ? 0.2 : isCurved ? 0.9 : 0.5;
 
   // Tính khoảng cách in km
   const distanceKm = weight ? pixelsToKm(weight, distanceScale) : null;
 
   // Tính điểm control cho đường cong
-  const controlOffset = 50; // Độ cong
+  const controlOffset = 50; // Độ cong cơ bản
   const dx = to.x - from.x;
   const dy = to.y - from.y;
   const distance = Math.sqrt(dx * dx + dy * dy);
   
-  // Điểm control nằm phía trên của đường thẳng
-  const controlX = (from.x + to.x) / 2 - (dy / distance) * controlOffset;
-  const controlY = (from.y + to.y) / 2 + (dx / distance) * controlOffset;
+  // Điểm control nằm phía trên/dưới của đường thẳng (tùy curveDirection)
+  const controlX = (from.x + to.x) / 2 - (dy / distance) * controlOffset * curveDirection;
+  const controlY = (from.y + to.y) / 2 + (dx / distance) * controlOffset * curveDirection;
   
   // Điểm giữa của đường cong (cho text)
   const curvedMidPoint = isCurved ? {

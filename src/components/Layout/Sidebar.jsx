@@ -139,7 +139,7 @@ const Sidebar = () => {
           newEdges.push({
             from: newNodes[i].id,
             to: newNodes[j].id,
-            isCurved: false // Cạnh tự động là đường thẳng
+            isCurved: false
           });
         }
       }
