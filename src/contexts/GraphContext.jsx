@@ -67,9 +67,18 @@ export const GraphProvider = ({ children }) => {
       id: nodes.length,
       x,
       y,
-      label: `V${nodes.length}`
+      label: `Trạm ${nodes.length + 1}`
     };
+    
+    // Tạo cạnh kết nối node mới với tất cả các node hiện tại
+    const newEdges = nodes.map(existingNode => ({
+      from: existingNode.id,
+      to: newNode.id,
+      isCurved: false
+    }));
+    
     setNodes([...nodes, newNode]);
+    setEdges([...edges, ...newEdges]);
   };
 
   /**
@@ -81,6 +90,38 @@ export const GraphProvider = ({ children }) => {
     // Cũng xóa tất cả edges liên quan đến node này
     setEdges(edges.filter(e => e.from !== nodeId && e.to !== nodeId));
     setMstEdges(mstEdges.filter(e => e.from !== nodeId && e.to !== nodeId));
+  };
+
+  /**
+   * Xóa một cạnh theo ID của 2 đỉnh
+   * @param {number} fromId - ID của đỉnh xuất phát
+   * @param {number} toId - ID của đỉnh đích
+   */
+  const removeEdge = (fromId, toId) => {
+    // Xóa cạnh (kiểm tra cả 2 chiều vì đồ thị vô hướng)
+    setEdges(edges.filter(e => 
+      !((e.from === fromId && e.to === toId) || (e.from === toId && e.to === fromId))
+    ));
+    setMstEdges(mstEdges.filter(e => 
+      !((e.from === fromId && e.to === toId) || (e.from === toId && e.to === fromId))
+    ));
+  };
+
+  /**
+   * Thêm một cạnh mới
+   * @param {number} fromId - ID của đỉnh xuất phát
+   * @param {number} toId - ID của đỉnh đích
+   * @param {boolean} isCurved - Cạnh có dạng cong hay không
+   */
+  const addEdge = (fromId, toId, isCurved = false) => {
+    // Kiểm tra cạnh đã tồn tại chưa
+    const edgeExists = edges.some(e => 
+      (e.from === fromId && e.to === toId) || (e.from === toId && e.to === fromId)
+    );
+    
+    if (!edgeExists && fromId !== toId) {
+      setEdges([...edges, { from: fromId, to: toId, isCurved }]);
+    }
   };
 
   /**
@@ -148,7 +189,21 @@ export const GraphProvider = ({ children }) => {
    * @param {Array} sampleNodes - Mảng nodes mẫu
    */
   const loadSampleGraph = (sampleNodes) => {
+    // Tạo tất cả các cạnh có thể cho đồ thị đầy đủ
+    const allEdges = [];
+    
+    for (let i = 0; i < sampleNodes.length; i++) {
+      for (let j = i + 1; j < sampleNodes.length; j++) {
+        allEdges.push({
+          from: sampleNodes[i].id,
+          to: sampleNodes[j].id,
+          isCurved: false
+        });
+      }
+    }
+    
     setNodes(sampleNodes);
+    setEdges(allEdges);
     setMstEdges([]);
     setTotalCost(0);
   };
@@ -172,6 +227,8 @@ export const GraphProvider = ({ children }) => {
     setDistanceScale,
     addNode,
     removeNode,
+    removeEdge,
+    addEdge,
     updateNodeLabel,
     clearGraph,
     loadSampleGraph,

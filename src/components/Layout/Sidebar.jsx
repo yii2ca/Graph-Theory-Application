@@ -18,6 +18,7 @@ const Sidebar = () => {
     setDistanceScale,
     loadSampleGraph,
     setNodes,
+    setEdges,
     clearGraph,
     edges: allEdges = [],
   } = useGraph();
@@ -114,14 +115,78 @@ const Sidebar = () => {
           id: i,
           x: point.x,
           y: point.y,
-          label: `V${i}`,
+          label: `Trạm ${i + 1}`,
         });
         console.log(`Node ${i}: x=${point.x.toFixed(0)}, y=${point.y.toFixed(0)}`);
       }
     }
 
     console.log('Total nodes created:', newNodes.length);
+    
+    // Tạo ngẫu nhiên các cạnh
+    const newEdges = [];
+    
+    // Xác suất có cạnh giữa 2 đỉnh bất kỳ (40-60%)
+    const edgeProbability = 0.4 + Math.random() * 0.2; // Random từ 0.4 đến 0.6
+    
+    console.log('Edge probability:', (edgeProbability * 100).toFixed(1) + '%');
+    
+    // Duyệt qua tất cả các cặp đỉnh
+    for (let i = 0; i < newNodes.length; i++) {
+      for (let j = i + 1; j < newNodes.length; j++) {
+        // Ngẫu nhiên quyết định có tạo cạnh hay không
+        if (Math.random() < edgeProbability) {
+          newEdges.push({
+            from: newNodes[i].id,
+            to: newNodes[j].id,
+            isCurved: false
+          });
+        }
+      }
+    }
+    
+    // Đảm bảo đồ thị liên thông (mỗi đỉnh có ít nhất 1 cạnh)
+    const connectedNodes = new Set();
+    newEdges.forEach(edge => {
+      connectedNodes.add(edge.from);
+      connectedNodes.add(edge.to);
+    });
+    
+    // Nếu có đỉnh cô lập, kết nối với đỉnh gần nhất
+    newNodes.forEach(node => {
+      if (!connectedNodes.has(node.id)) {
+        // Tìm đỉnh gần nhất
+        let nearestNode = null;
+        let minDistance = Infinity;
+        
+        newNodes.forEach(otherNode => {
+          if (otherNode.id !== node.id) {
+            const dx = node.x - otherNode.x;
+            const dy = node.y - otherNode.y;
+            const distance = Math.sqrt(dx * dx + dy * dy);
+            
+            if (distance < minDistance) {
+              minDistance = distance;
+              nearestNode = otherNode;
+            }
+          }
+        });
+        
+        if (nearestNode) {
+          newEdges.push({
+            from: node.id,
+            to: nearestNode.id,
+            isCurved: false
+          });
+          console.log(`Connected isolated node ${node.id} to ${nearestNode.id}`);
+        }
+      }
+    });
+    
+    console.log('Total edges created:', newEdges.length);
+    
     setNodes(newNodes);
+    setEdges(newEdges);
   };
 
   return (
@@ -259,29 +324,6 @@ const Sidebar = () => {
             </Button>
           </div>
         </Card>
-
-        {/* MST Edges Info */}
-        {mstEdges.length > 0 && (
-          <Card
-            title="Cạnh MST"
-            variant="primary"
-            collapsible
-            defaultOpen
-          >
-            <div className="sidebar__edges-list">
-              {mstEdges.map((edge, idx) => (
-                <div key={idx} className="sidebar__edge-item">
-                  <span className="sidebar__edge-label">
-                    {edge.from} → {edge.to}
-                  </span>
-                  <span className="sidebar__edge-weight">
-                    {pixelsToKm(edge.weight)} km
-                  </span>
-                </div>
-              ))}
-            </div>
-          </Card>
-        )}
       </div>
     </aside>
   );

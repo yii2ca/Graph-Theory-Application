@@ -10,10 +10,13 @@ import './MapCanvas.css';
  */
 const MapCanvas = forwardRef((props, ref) => {
   const canvasRef = useRef(null);
-  const { nodes, mstEdges, distanceScale, addNode, updateNodePosition, removeNode, updateNodeLabel } = useGraph();
+  const { nodes, edges, mstEdges, distanceScale, addNode, updateNodePosition, removeNode, removeEdge, addEdge, updateNodeLabel } = useGraph();
   const [hoveredNode, setHoveredNode] = useState(null);
   const [draggedNode, setDraggedNode] = useState(null);
   const [isDragging, setIsDragging] = useState(false);
+  const [isCreatingEdge, setIsCreatingEdge] = useState(false);
+  const [edgeStartNode, setEdgeStartNode] = useState(null);
+  const [edgeEndPosition, setEdgeEndPosition] = useState(null);
   const [selectedNodeForRename, setSelectedNodeForRename] = useState(null);
   const [newLabel, setNewLabel] = useState('');
   const [zoom, setZoom] = useState(1);
@@ -192,6 +195,42 @@ const MapCanvas = forwardRef((props, ref) => {
     return { canvasX, canvasY };
   };
 
+  /**
+   * Tính khoảng cách từ điểm đến đoạn thẳng
+   */
+  const pointToLineDistance = (px, py, x1, y1, x2, y2) => {
+    const A = px - x1;
+    const B = py - y1;
+    const C = x2 - x1;
+    const D = y2 - y1;
+
+    const dot = A * C + B * D;
+    const lenSq = C * C + D * D;
+    let param = -1;
+    
+    if (lenSq !== 0) {
+      param = dot / lenSq;
+    }
+
+    let xx, yy;
+
+    if (param < 0) {
+      xx = x1;
+      yy = y1;
+    } else if (param > 1) {
+      xx = x2;
+      yy = y2;
+    } else {
+      xx = x1 + param * C;
+      yy = y1 + param * D;
+    }
+
+    const dx = px - xx;
+    const dy = py - yy;
+    
+    return Math.sqrt(dx * dx + dy * dy);
+  };
+
   const handleContextMenu = (e) => {
     e.preventDefault();
     
@@ -206,6 +245,26 @@ const MapCanvas = forwardRef((props, ref) => {
 
     if (clickedNode) {
       removeNode(clickedNode.id);
+      return;
+    }
+
+    // Kiểm tra click vào cạnh
+    const edgeClickRadius = 15; // Bán kính nhận diện cạnh
+    
+    // Kiểm tra tất cả các cạnh
+    for (let i = 0; i < nodes.length; i++) {
+      for (let j = i + 1; j < nodes.length; j++) {
+        const fromNode = nodes[i];
+        const toNode = nodes[j];
+        
+        // Tính khoảng cách từ điểm click đến đoạn thẳng
+        const distance = pointToLineDistance(x, y, fromNode.x, fromNode.y, toNode.x, toNode.y);
+        
+        if (distance <= edgeClickRadius) {
+          removeEdge(fromNode.id, toNode.id);
+          return;
+        }
+      }
     }
   };
 
@@ -253,6 +312,12 @@ const MapCanvas = forwardRef((props, ref) => {
   const handleCanvasMouseMove = (e) => {
     const { canvasX: x, canvasY: y } = getCanvasCoordinates(e.clientX, e.clientY);
 
+    // Nếu đang tạo cạnh, cập nhật vị trí đích
+    if (isCreatingEdge) {
+      setEdgeEndPosition({ x, y });
+      return;
+    }
+
     // Nếu đang kéo node, cập nhật vị trí
     if (draggedNode !== null) {
       setIsDragging(true);
@@ -271,7 +336,7 @@ const MapCanvas = forwardRef((props, ref) => {
   };
 
   /**
-   * Bắt đầu kéo node
+   * Bắt đầu kéo node hoặc tạo cạnh
    */
   const handleMouseDown = (e) => {
     const { canvasX: x, canvasY: y } = getCanvasCoordinates(e.clientX, e.clientY);
@@ -284,16 +349,46 @@ const MapCanvas = forwardRef((props, ref) => {
     });
 
     if (clickedNode) {
-      setDraggedNode(clickedNode.id);
-      setIsDragging(false);
-      e.preventDefault();
+      // Nếu giữ Shift hoặc Ctrl, tạo cạnh
+      if (e.shiftKey || e.ctrlKey) {
+        setIsCreatingEdge(true);
+        setEdgeStartNode(clickedNode);
+        setEdgeEndPosition({ x, y });
+        e.preventDefault();
+      } else {
+        // Ngược lại, kéo node
+        setDraggedNode(clickedNode.id);
+        setIsDragging(false);
+        e.preventDefault();
+      }
     }
   };
 
   /**
-   * Kết thúc kéo node
+   * Kết thúc kéo node hoặc tạo cạnh
    */
-  const handleMouseUp = () => {
+  const handleMouseUp = (e) => {
+    // Nếu đang tạo cạnh
+    if (isCreatingEdge && edgeStartNode) {
+      const { canvasX: x, canvasY: y } = getCanvasCoordinates(e.clientX, e.clientY);
+      const clickRadius = getClickRadius();
+      
+      // Tìm node đích
+      const targetNode = nodes.find(node => {
+        const distance = Math.sqrt((node.x - x) ** 2 + (node.y - y) ** 2);
+        return distance <= clickRadius;
+      });
+      
+      // Nếu tìm thấy node đích và khác node xuất phát, tạo cạnh cong
+      if (targetNode && targetNode.id !== edgeStartNode.id) {
+        addEdge(edgeStartNode.id, targetNode.id, true); // true = isCurved
+      }
+      
+      setIsCreatingEdge(false);
+      setEdgeStartNode(null);
+      setEdgeEndPosition(null);
+    }
+    
     setDraggedNode(null);
   };
 
@@ -327,23 +422,52 @@ const MapCanvas = forwardRef((props, ref) => {
           transformOrigin: '0 0',
           transition: 'transform 0.2s ease-out'
         }}>
-          {/* Vẽ tất cả các cạnh có thể (màu xám nhạt) */}
-          {nodes.map((fromNode, i) =>
-            nodes.slice(i + 1).map((toNode) => {
-              const distance = calculateDistance(fromNode, toNode);
-              return (
-                <Edge
-                  key={`edge-${fromNode.id}-${toNode.id}`}
-                  from={fromNode}
-                  to={toNode}
-                  isMst={false}
-                  isDefault={true}
-                  weight={distance}
-                  distanceScale={distanceScale}
-                />
-              );
-            })
+          {/* Đường cong khi đang tạo cạnh */}
+          {isCreatingEdge && edgeStartNode && edgeEndPosition && (
+            <g>
+              <path
+                d={`M ${edgeStartNode.x} ${edgeStartNode.y} Q ${(edgeStartNode.x + edgeEndPosition.x) / 2} ${(edgeStartNode.y + edgeEndPosition.y) / 2 - 50} ${edgeEndPosition.x} ${edgeEndPosition.y}`}
+                stroke="#8b5cf6"
+                strokeWidth="3"
+                fill="none"
+                strokeDasharray="8,4"
+                opacity="0.8"
+                style={{
+                  filter: 'drop-shadow(0 0 8px rgba(139, 92, 246, 0.6))'
+                }}
+              />
+              <circle
+                cx={edgeEndPosition.x}
+                cy={edgeEndPosition.y}
+                r="8"
+                fill="#8b5cf6"
+                opacity="0.6"
+              />
+            </g>
           )}
+
+          {/* Vẽ các cạnh (màu xám nhạt) */}
+          {edges.map((edge) => {
+            const fromNode = nodes.find(n => n.id === edge.from);
+            const toNode = nodes.find(n => n.id === edge.to);
+            
+            if (!fromNode || !toNode) return null;
+            
+            const distance = calculateDistance(fromNode, toNode);
+            return (
+              <Edge
+                key={`edge-${edge.from}-${edge.to}`}
+                from={fromNode}
+                to={toNode}
+                isMst={false}
+                isDefault={!edge.isCurved}
+                isCurved={edge.isCurved || false}
+                curveDirection={edge.curveDirection || 1}
+                weight={distance}
+                distanceScale={distanceScale}
+              />
+            );
+          })}
 
           {/* Vẽ các cạnh MST (màu xanh lá) */}
           {mstEdges.map((edge, index) => (
