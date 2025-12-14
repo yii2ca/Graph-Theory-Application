@@ -115,7 +115,7 @@ const Sidebar = () => {
           id: i,
           x: point.x,
           y: point.y,
-          label: `V${i}`,
+          label: `Trạm ${i + 1}`,
         });
         console.log(`Node ${i}: x=${point.x.toFixed(0)}, y=${point.y.toFixed(0)}`);
       }
@@ -324,29 +324,6 @@ const Sidebar = () => {
             </Button>
           </div>
         </Card>
-
-        {/* MST Edges Info */}
-        {mstEdges.length > 0 && (
-          <Card
-            title="Cạnh MST"
-            variant="primary"
-            collapsible
-            defaultOpen
-          >
-            <div className="sidebar__edges-list">
-              {mstEdges.map((edge, idx) => (
-                <div key={idx} className="sidebar__edge-item">
-                  <span className="sidebar__edge-label">
-                    {edge.from} → {edge.to}
-                  </span>
-                  <span className="sidebar__edge-weight">
-                    {pixelsToKm(edge.weight)} km
-                  </span>
-                </div>
-              ))}
-            </div>
-          </Card>
-        )}
       </div>
     </aside>
   );

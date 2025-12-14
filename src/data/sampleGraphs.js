@@ -13,14 +13,14 @@ export const smallGraph = [
 
 // Đồ thị trung bình - 8 đỉnh
 export const mediumGraph = [
-  { id: 0, x: 150, y: 100, label: 'V0' },
-  { id: 1, x: 350, y: 100, label: 'V1' },
-  { id: 2, x: 550, y: 100, label: 'V2' },
-  { id: 3, x: 700, y: 100, label: 'V3' },
-  { id: 4, x: 150, y: 300, label: 'V4' },
-  { id: 5, x: 350, y: 300, label: 'V5' },
-  { id: 6, x: 550, y: 300, label: 'V6' },
-  { id: 7, x: 700, y: 300, label: 'V7' }
+  { id: 0, x: 150, y: 100, label: 'Trạm 1' },
+  { id: 1, x: 350, y: 100, label: 'Trạm 2' },
+  { id: 2, x: 550, y: 100, label: 'Trạm 3' },
+  { id: 3, x: 700, y: 100, label: 'Trạm 4' },
+  { id: 4, x: 150, y: 300, label: 'Trạm 5' },
+  { id: 5, x: 350, y: 300, label: 'Trạm 6' },
+  { id: 6, x: 550, y: 300, label: 'Trạm 7' },
+  { id: 7, x: 700, y: 300, label: 'Trạm 8' }
 ];
 
 // Đồ thị lớn - hình tròn
@@ -32,7 +32,7 @@ export const circleGraph = (n = 12, centerX = 400, centerY = 250, radius = 180) 
       id: i,
       x: centerX + radius * Math.cos(angle),
       y: centerY + radius * Math.sin(angle),
-      label: `V${i}`
+      label: `Trạm ${i + 1}`
     });
   }
   return nodes;
@@ -48,7 +48,7 @@ export const gridGraph = (rows = 3, cols = 3, spacing = 150, offsetX = 200, offs
         id: id++,
         x: offsetX + j * spacing,
         y: offsetY + i * spacing,
-        label: `V${id - 1}`
+        label: `Trạm ${id}`
       });
     }
   }

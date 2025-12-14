@@ -67,7 +67,7 @@ export const GraphProvider = ({ children }) => {
       id: nodes.length,
       x,
       y,
-      label: `V${nodes.length}`
+      label: `Trạm ${nodes.length + 1}`
     };
     
     // Tạo cạnh kết nối node mới với tất cả các node hiện tại
