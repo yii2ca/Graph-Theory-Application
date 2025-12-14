@@ -15,7 +15,9 @@ const Sidebar = () => {
     totalCost,
     isMenuOpen,
     distanceScale,
+    backgroundImage,
     setDistanceScale,
+    setBackgroundImage,
     loadSampleGraph,
     setNodes,
     setEdges,
@@ -281,47 +283,59 @@ const Sidebar = () => {
           </div>
         </Card>
 
-        {/* Sample Graphs */}
+        {/* Import Image */}
         <Card
-          title="Đồ Thị Mẫu"
-          icon={Network}
+          title="📷 Import Ảnh Bản Đồ"
           variant="secondary"
           collapsible
           defaultOpen
         >
-          <div className="sidebar__buttons">
-            <Button
-              variant="secondary"
-              size="md"
-              onClick={() => loadSampleGraph(sampleGraphs.small)}
-              className="sidebar__full-btn"
-            >
-              Nhỏ (5 đỉnh)
-            </Button>
-            <Button
-              variant="secondary"
-              size="md"
-              onClick={() => loadSampleGraph(sampleGraphs.medium)}
-              className="sidebar__full-btn"
-            >
-              Trung bình (8 đỉnh)
-            </Button>
-            <Button
-              variant="secondary"
-              size="md"
-              onClick={() => loadSampleGraph(sampleGraphs.circle)}
-              className="sidebar__full-btn"
-            >
-              Tròn (12 đỉnh)
-            </Button>
-            <Button
-              variant="secondary"
-              size="md"
-              onClick={() => loadSampleGraph(sampleGraphs.grid)}
-              className="sidebar__full-btn"
-            >
-              Lưới (9 đỉnh)
-            </Button>
+          <div className="sidebar__image-upload">
+            <input
+              type="file"
+              id="image-upload"
+              accept="image/*"
+              style={{ display: 'none' }}
+              onChange={(e) => {
+                const file = e.target.files?.[0];
+                if (file) {
+                  const reader = new FileReader();
+                  reader.onload = (event) => {
+                    setBackgroundImage(event.target.result);
+                  };
+                  reader.readAsDataURL(file);
+                }
+              }}
+            />
+            <label htmlFor="image-upload">
+              <Button
+                variant="secondary"
+                size="md"
+                onClick={() => document.getElementById('image-upload').click()}
+                className="sidebar__full-btn"
+              >
+                📁 Chọn Ảnh
+              </Button>
+            </label>
+            {backgroundImage && (
+              <Button
+                variant="danger"
+                size="sm"
+                onClick={() => setBackgroundImage(null)}
+                className="sidebar__full-btn"
+                style={{ marginTop: '8px' }}
+              >
+                🗑️ Xóa Ảnh
+              </Button>
+            )}
+            <p style={{
+              fontSize: '12px',
+              color: '#94a3b8',
+              marginTop: '12px',
+              lineHeight: '1.5'
+            }}>
+              💡 Sau khi import ảnh, click trên ảnh để đặt các trạm (nodes), hệ thống sẽ tự động tạo kết nối.
+            </p>
           </div>
         </Card>
       </div>

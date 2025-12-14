@@ -10,7 +10,7 @@ import './MapCanvas.css';
  */
 const MapCanvas = forwardRef((props, ref) => {
   const canvasRef = useRef(null);
-  const { nodes, edges, mstEdges, distanceScale, addNode, updateNodePosition, removeNode, removeEdge, addEdge, updateNodeLabel } = useGraph();
+  const { nodes, edges, mstEdges, distanceScale, backgroundImage, addNode, updateNodePosition, removeNode, removeEdge, addEdge, updateNodeLabel, updateEdgeControlPoint } = useGraph();
   const [hoveredNode, setHoveredNode] = useState(null);
   const [draggedNode, setDraggedNode] = useState(null);
   const [isDragging, setIsDragging] = useState(false);
@@ -278,6 +278,11 @@ const MapCanvas = forwardRef((props, ref) => {
       return;
     }
 
+    // Không thêm node nếu click vào control point của edge
+    if (e.target.closest('.edge-group')) {
+      return;
+    }
+
     const { canvasX: x, canvasY: y } = getCanvasCoordinates(e.clientX, e.clientY);
 
     // Kiểm tra có click vào node nào không
@@ -349,14 +354,14 @@ const MapCanvas = forwardRef((props, ref) => {
     });
 
     if (clickedNode) {
-      // Nếu giữ Shift hoặc Ctrl, tạo cạnh
-      if (e.shiftKey || e.ctrlKey) {
+      // Nếu giữ Shift, tạo đường nối
+      if (e.shiftKey) {
         setIsCreatingEdge(true);
         setEdgeStartNode(clickedNode);
         setEdgeEndPosition({ x, y });
         e.preventDefault();
       } else {
-        // Ngược lại, kéo node
+        // Mặc định: kéo di chuyển node
         setDraggedNode(clickedNode.id);
         setIsDragging(false);
         e.preventDefault();
@@ -393,15 +398,7 @@ const MapCanvas = forwardRef((props, ref) => {
   };
 
   return (
-    <div className="map-canvas">
-      {/* Background pattern */}
-      <div className="absolute inset-0 opacity-10">
-        <div className="absolute inset-0" style={{
-          backgroundImage: `radial-gradient(circle, #8b5cf6 1px, transparent 1px)`,
-          backgroundSize: '50px 50px'
-        }} />
-      </div>
-
+    <div className={`map-canvas ${!backgroundImage ? 'map-canvas--with-grid' : ''}`}>
       {/* SVG Canvas */}
       <svg
         ref={canvasRef}
@@ -416,20 +413,48 @@ const MapCanvas = forwardRef((props, ref) => {
         onWheel={handleWheel}
         style={{ userSelect: 'none', display: 'block' }}
       >
+        {/* Background Image */}
+        {backgroundImage && (
+          <defs>
+            <pattern id="background-image" patternUnits="userSpaceOnUse" width="100%" height="100%">
+              <image 
+                href={backgroundImage} 
+                x="0" 
+                y="0" 
+                width="100%" 
+                height="100%" 
+                preserveAspectRatio="xMidYMid slice"
+              />
+            </pattern>
+          </defs>
+        )}
+        {backgroundImage && (
+          <rect 
+            x="0" 
+            y="0" 
+            width="100%" 
+            height="100%" 
+            fill="url(#background-image)" 
+            opacity="0.5"
+          />
+        )}
+
         {/* Group để áp dụng zoom và pan */}
         <g style={{
           transform: `translate(${panX}px, ${panY}px) scale(${zoom})`,
           transformOrigin: '0 0',
           transition: 'transform 0.2s ease-out'
         }}>
-          {/* Đường cong khi đang tạo cạnh */}
+          {/* Đường thẳng khi đang tạo cạnh */}
           {isCreatingEdge && edgeStartNode && edgeEndPosition && (
             <g>
-              <path
-                d={`M ${edgeStartNode.x} ${edgeStartNode.y} Q ${(edgeStartNode.x + edgeEndPosition.x) / 2} ${(edgeStartNode.y + edgeEndPosition.y) / 2 - 50} ${edgeEndPosition.x} ${edgeEndPosition.y}`}
+              <line
+                x1={edgeStartNode.x}
+                y1={edgeStartNode.y}
+                x2={edgeEndPosition.x}
+                y2={edgeEndPosition.y}
                 stroke="#8b5cf6"
                 strokeWidth="3"
-                fill="none"
                 strokeDasharray="8,4"
                 opacity="0.8"
                 style={{
@@ -454,15 +479,17 @@ const MapCanvas = forwardRef((props, ref) => {
             if (!fromNode || !toNode) return null;
             
             const distance = calculateDistance(fromNode, toNode);
+            const edgeId = edge.id || `${edge.from}-${edge.to}`;
             return (
               <Edge
-                key={`edge-${edge.from}-${edge.to}`}
+                key={edgeId}
+                edgeId={edgeId}
                 from={fromNode}
                 to={toNode}
                 isMst={false}
-                isDefault={!edge.isCurved}
-                isCurved={edge.isCurved || false}
-                curveDirection={edge.curveDirection || 1}
+                isDefault={false}
+                controlPoint={edge.controlPoint}
+                onControlPointDrag={updateEdgeControlPoint}
                 weight={distance}
                 distanceScale={distanceScale}
               />
@@ -494,21 +521,6 @@ const MapCanvas = forwardRef((props, ref) => {
           ))}
         </g>
       </svg>
-
-      {/* Helper text */}
-      {nodes.length === 0 && (
-        <div className="map-canvas__empty">
-          <div className="map-canvas__empty-content">
-            <div className="map-canvas__empty-icon">🗺️</div>
-            <p className="map-canvas__empty-title">
-              Click vào canvas để thêm điểm
-            </p>
-            <p className="map-canvas__empty-subtitle">
-              Hoặc chọn đồ thị mẫu từ menu bên trái
-            </p>
-          </div>
-        </div>
-      )}
 
       {/* Dialog đổi tên node */}
       {selectedNodeForRename && (

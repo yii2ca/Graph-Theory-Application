@@ -86,47 +86,61 @@ const Header = () => {
       >
         <div className="help-content">
           <div className="help-section">
-            <h3>🎯 Cách Sử Dụng:</h3>
+            <h3>🗺️ Import Ảnh Bản Đồ:</h3>
             <ul>
-              <li><strong>Tạo đồ thị mẫu:</strong> Chọn từ danh sách "Đồ Thị Mẫu" ở Sidebar</li>
-              <li><strong>Tạo ngẫu nhiên:</strong> Nhập số đỉnh (3-20) và ấn "Tạo Ngẫu Nhiên"</li>
-              <li><strong>Thêm đỉnh:</strong> Click trực tiếp lên canvas để thêm điểm</li>
-              <li><strong>Kéo đỉnh:</strong> Click và kéo một đỉnh để di chuyển vị trí</li>
-              <li><strong>Đổi tên đỉnh:</strong> Double-click vào đỉnh, nhập tên mới, ấn "Lưu"</li>
-              <li><strong>Xóa đỉnh:</strong> Right-click vào đỉnh để xóa ngay lập tức</li>
-              <li><strong>Xóa tất cả:</strong> Ấn nút "Xóa Tất Cả" ở Sidebar</li>
+              <li><strong>Chọn ảnh:</strong> Click "📁 Chọn Ảnh" ở Sidebar để import ảnh bản đồ</li>
+              <li><strong>Xóa ảnh:</strong> Click "🗑️ Xóa Ảnh" để xóa background</li>
             </ul>
           </div>
 
           <div className="help-section">
-            <h3>🔄 Thuật Toán MST:</h3>
+            <h3>📍 Thao Tác Với Trạm (Node):</h3>
             <ul>
-              <li><strong>Kruskal:</strong> Sắp xếp tất cả cạnh theo trọng số từ nhỏ đến lớn, lần lượt thêm cạnh nếu không tạo chu trình. Tốt cho đồ thị thưa.</li>
-              <li><strong>Prim:</strong> Bắt đầu từ một đỉnh, lần lượt thêm cạnh nhỏ nhất từ cây hiện tại tới đỉnh chưa thêm. Tốt cho đồ thị dày đặc.</li>
-              <li><strong>Kết quả:</strong> Cả hai thuật toán đều cho MST tối ưu với tổng trọng số nhỏ nhất</li>
+              <li><strong>Thêm trạm:</strong> Click vào canvas để đặt trạm mới</li>
+              <li><strong>Di chuyển trạm:</strong> Kéo thả trạm bằng chuột trái</li>
+              <li><strong>Đổi tên trạm:</strong> Double-click vào trạm → nhập tên → Lưu</li>
+              <li><strong>Xóa trạm:</strong> Right-click vào trạm</li>
+              <li><strong>Xem tên:</strong> Hover vào trạm để hiển thị tooltip</li>
             </ul>
           </div>
 
           <div className="help-section">
-            <h3>❓ Minimum Spanning Tree (MST) là gì?</h3>
+            <h3>🔗 Thao Tác Với Đường Nối (Edge):</h3>
+            <ul>
+              <li><strong>Tạo đường nối:</strong> Shift + Kéo từ trạm A sang trạm B</li>
+              <li><strong>Uốn cong đường:</strong> Hover vào đường → kéo chấm tròn trắng</li>
+              <li><strong>Xem khoảng cách:</strong> Hover vào đường để hiển thị số km</li>
+            </ul>
+          </div>
+
+          <div className="help-section">
+            <h3>🚂 Chạy Thuật Toán MST:</h3>
+            <ul>
+              <li><strong>Chọn thuật toán:</strong> Kruskal hoặc Prim từ dropdown</li>
+              <li><strong>Thực thi:</strong> Click "▶ Thực thi" để tìm đường sắt tối ưu</li>
+              <li><strong>Kết quả:</strong> Đường xanh lá = đường sắt tối ưu (MST)</li>
+            </ul>
+          </div>
+
+          <div className="help-section">
+            <h3>❓ MST (Minimum Spanning Tree) là gì?</h3>
             <p>
-              MST là tập hợp cạnh kết nối tất cả đỉnh trong đồ thị với:
-              <ul>
-                <li>✓ Không tạo chu trình (Acyclic)</li>
-                <li>✓ Tổng trọng số nhỏ nhất (Minimal)</li>
-                <li>✓ Kết nối mọi đỉnh (Spanning)</li>
-              </ul>
-              <strong>Ứng dụng:</strong> Thiết kế mạng lưới, đường sắt, điện thoại với chi phí tối thiểu
+              Cây khung nhỏ nhất - kết nối tất cả trạm với tổng chiều dài đường ray ngắn nhất:
             </p>
+            <ul>
+              <li>✓ Không tạo vòng lặp</li>
+              <li>✓ Tổng km nhỏ nhất</li>
+              <li>✓ Kết nối mọi trạm</li>
+            </ul>
           </div>
 
           <div className="help-section">
-            <h3>💡 Mẹo sử dụng:</h3>
+            <h3>⌨️ Phím Tắt:</h3>
             <ul>
-              <li>Chọn "Kruskal" hoặc "Prim" từ dropdown "Thuật toán" trước khi thực thi</li>
-              <li>Ấn "Thực thi" để chạy thuật toán và hiển thị MST (cạnh xanh lá)</li>
-              <li>Xem "Thông Tin" ở Sidebar để theo dõi số đỉnh, cạnh, và tổng chi phí</li>
-              <li>Double-click để đổi tên, Right-click để xóa - rất tiện!</li>
+              <li><strong>Shift + Kéo:</strong> Tạo đường nối</li>
+              <li><strong>Ctrl + Scroll:</strong> Zoom in/out</li>
+              <li><strong>Double-click:</strong> Đổi tên trạm</li>
+              <li><strong>Right-click:</strong> Xóa trạm</li>
             </ul>
           </div>
         </div>
