@@ -1,10 +1,11 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { getMidPoint, pixelsToKm } from '../../utils/calculations';
 
 /**
  * Edge component - Đại diện cho một cạnh trong đồ thị
  */
 const Edge = ({ from, to, isMst, isDefault, isCurved = false, curveDirection = 1, weight, distanceScale = 0.5, animationDelay = 0 }) => {
+  const [isHovered, setIsHovered] = useState(false);
   const midPoint = getMidPoint(from, to);
   
   // Màu và độ dày
@@ -32,7 +33,31 @@ const Edge = ({ from, to, isMst, isDefault, isCurved = false, curveDirection = 1
   } : midPoint;
 
   return (
-    <g className="edge-group">
+    <g 
+      className="edge-group"
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
+      style={{ cursor: 'pointer' }}
+    >
+      {/* Vùng hover rộng hơn để dễ bắt sự kiện */}
+      {isCurved ? (
+        <path
+          d={`M ${from.x} ${from.y} Q ${controlX} ${controlY} ${to.x} ${to.y}`}
+          stroke="transparent"
+          strokeWidth={20}
+          fill="none"
+        />
+      ) : (
+        <line
+          x1={from.x}
+          y1={from.y}
+          x2={to.x}
+          y2={to.y}
+          stroke="transparent"
+          strokeWidth={20}
+        />
+      )}
+
       {/* Cạnh chính */}
       {isCurved ? (
         <path
@@ -64,8 +89,8 @@ const Edge = ({ from, to, isMst, isDefault, isCurved = false, curveDirection = 1
         />
       )}
 
-      {/* Hiển thị khoảng cách cho tất cả cạnh */}
-      {distanceKm && (
+      {/* Hiển thị khoảng cách chỉ khi hover */}
+      {distanceKm && isHovered && (
         <g>
           {/* Background cho text */}
           <rect
@@ -73,12 +98,11 @@ const Edge = ({ from, to, isMst, isDefault, isCurved = false, curveDirection = 1
             y={curvedMidPoint.y - 13}
             width="64"
             height="26"
-            fill={isMst ? '#0f172a' : isCurved ? '#312e81' : '#1e1b4b'}
-            rx="4"
-            opacity={isMst ? 0.95 : 0.9}
-            className={isMst ? 'animate-fade-in' : ''}
+            fill={isMst ? '#0f172a' : '#1e293b'}
+            rx="6"
+            opacity="0.95"
             style={{
-              animationDelay: isMst ? `${animationDelay + 300}ms` : '0ms'
+              filter: 'drop-shadow(0 2px 8px rgba(0,0,0,0.3))'
             }}
           />
           
@@ -88,13 +112,10 @@ const Edge = ({ from, to, isMst, isDefault, isCurved = false, curveDirection = 1
             y={curvedMidPoint.y}
             textAnchor="middle"
             dominantBaseline="central"
-            fill={isMst ? '#10b981' : isCurved ? '#c4b5fd' : '#a78bfa'}
-            fontSize={isMst ? '13' : isCurved ? '12' : '11'}
-            fontWeight={isMst ? 'bold' : isCurved ? '600' : '500'}
+            fill={isMst ? '#10b981' : '#ffffff'}
+            fontSize="12"
+            fontWeight="600"
             className="pointer-events-none select-none"
-            style={{
-              animation: isMst ? `fadeIn 0.5s ease-out ${animationDelay + 300}ms both` : 'none'
-            }}
           >
             {distanceKm} km
           </text>

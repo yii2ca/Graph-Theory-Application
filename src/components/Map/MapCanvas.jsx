@@ -10,7 +10,7 @@ import './MapCanvas.css';
  */
 const MapCanvas = forwardRef((props, ref) => {
   const canvasRef = useRef(null);
-  const { nodes, edges, mstEdges, distanceScale, addNode, updateNodePosition, removeNode, removeEdge, addEdge, updateNodeLabel } = useGraph();
+  const { nodes, edges, mstEdges, distanceScale, backgroundImage, addNode, updateNodePosition, removeNode, removeEdge, addEdge, updateNodeLabel } = useGraph();
   const [hoveredNode, setHoveredNode] = useState(null);
   const [draggedNode, setDraggedNode] = useState(null);
   const [isDragging, setIsDragging] = useState(false);
@@ -393,15 +393,7 @@ const MapCanvas = forwardRef((props, ref) => {
   };
 
   return (
-    <div className="map-canvas">
-      {/* Background pattern */}
-      <div className="absolute inset-0 opacity-10">
-        <div className="absolute inset-0" style={{
-          backgroundImage: `radial-gradient(circle, #8b5cf6 1px, transparent 1px)`,
-          backgroundSize: '50px 50px'
-        }} />
-      </div>
-
+    <div className={`map-canvas ${!backgroundImage ? 'map-canvas--with-grid' : ''}`}>
       {/* SVG Canvas */}
       <svg
         ref={canvasRef}
@@ -416,6 +408,32 @@ const MapCanvas = forwardRef((props, ref) => {
         onWheel={handleWheel}
         style={{ userSelect: 'none', display: 'block' }}
       >
+        {/* Background Image */}
+        {backgroundImage && (
+          <defs>
+            <pattern id="background-image" patternUnits="userSpaceOnUse" width="100%" height="100%">
+              <image 
+                href={backgroundImage} 
+                x="0" 
+                y="0" 
+                width="100%" 
+                height="100%" 
+                preserveAspectRatio="xMidYMid slice"
+              />
+            </pattern>
+          </defs>
+        )}
+        {backgroundImage && (
+          <rect 
+            x="0" 
+            y="0" 
+            width="100%" 
+            height="100%" 
+            fill="url(#background-image)" 
+            opacity="0.5"
+          />
+        )}
+
         {/* Group để áp dụng zoom và pan */}
         <g style={{
           transform: `translate(${panX}px, ${panY}px) scale(${zoom})`,
@@ -494,21 +512,6 @@ const MapCanvas = forwardRef((props, ref) => {
           ))}
         </g>
       </svg>
-
-      {/* Helper text */}
-      {nodes.length === 0 && (
-        <div className="map-canvas__empty">
-          <div className="map-canvas__empty-content">
-            <div className="map-canvas__empty-icon">🗺️</div>
-            <p className="map-canvas__empty-title">
-              Click vào canvas để thêm điểm
-            </p>
-            <p className="map-canvas__empty-subtitle">
-              Hoặc chọn đồ thị mẫu từ menu bên trái
-            </p>
-          </div>
-        </div>
-      )}
 
       {/* Dialog đổi tên node */}
       {selectedNodeForRename && (

@@ -40,6 +40,9 @@ export const GraphProvider = ({ children }) => {
   // Mặc định: 1 pixel = 0.5 km
   const [distanceScale, setDistanceScale] = useState(0.5);
 
+  // State cho background image
+  const [backgroundImage, setBackgroundImage] = useState(null);
+
   /**
    * Thêm node mới vào đồ thị
    * @param {number} x - Tọa độ x
@@ -217,6 +220,7 @@ export const GraphProvider = ({ children }) => {
     isMenuOpen,
     algorithm,
     distanceScale,
+    backgroundImage,
     setNodes,
     setEdges,
     setMstEdges,
@@ -225,6 +229,7 @@ export const GraphProvider = ({ children }) => {
     setIsMenuOpen,
     setAlgorithm,
     setDistanceScale,
+    setBackgroundImage,
     addNode,
     removeNode,
     removeEdge,
