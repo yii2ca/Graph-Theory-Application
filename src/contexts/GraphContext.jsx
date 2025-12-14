@@ -73,15 +73,8 @@ export const GraphProvider = ({ children }) => {
       label: `Trạm ${nodes.length + 1}`
     };
     
-    // Tạo cạnh kết nối node mới với tất cả các node hiện tại
-    const newEdges = nodes.map(existingNode => ({
-      from: existingNode.id,
-      to: newNode.id,
-      isCurved: false
-    }));
-    
+    // Không tự động tạo cạnh - người dùng sẽ tự kéo đường nối
     setNodes([...nodes, newNode]);
-    setEdges([...edges, ...newEdges]);
   };
 
   /**
@@ -114,17 +107,28 @@ export const GraphProvider = ({ children }) => {
    * Thêm một cạnh mới
    * @param {number} fromId - ID của đỉnh xuất phát
    * @param {number} toId - ID của đỉnh đích
-   * @param {boolean} isCurved - Cạnh có dạng cong hay không
    */
-  const addEdge = (fromId, toId, isCurved = false) => {
+  const addEdge = (fromId, toId) => {
     // Kiểm tra cạnh đã tồn tại chưa
     const edgeExists = edges.some(e => 
       (e.from === fromId && e.to === toId) || (e.from === toId && e.to === fromId)
     );
     
     if (!edgeExists && fromId !== toId) {
-      setEdges([...edges, { from: fromId, to: toId, isCurved }]);
+      const edgeId = `${fromId}-${toId}`;
+      setEdges([...edges, { from: fromId, to: toId, id: edgeId, controlPoint: null }]);
     }
+  };
+
+  /**
+   * Cập nhật điểm điều khiển của cạnh (để làm cong)
+   * @param {string} edgeId - ID của cạnh
+   * @param {Object} controlPoint - Điểm điều khiển {x, y}
+   */
+  const updateEdgeControlPoint = (edgeId, controlPoint) => {
+    setEdges(edges.map(edge => 
+      edge.id === edgeId ? { ...edge, controlPoint } : edge
+    ));
   };
 
   /**
@@ -234,6 +238,7 @@ export const GraphProvider = ({ children }) => {
     removeNode,
     removeEdge,
     addEdge,
+    updateEdgeControlPoint,
     updateNodeLabel,
     clearGraph,
     loadSampleGraph,

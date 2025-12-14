@@ -10,7 +10,7 @@ import './MapCanvas.css';
  */
 const MapCanvas = forwardRef((props, ref) => {
   const canvasRef = useRef(null);
-  const { nodes, edges, mstEdges, distanceScale, backgroundImage, addNode, updateNodePosition, removeNode, removeEdge, addEdge, updateNodeLabel } = useGraph();
+  const { nodes, edges, mstEdges, distanceScale, backgroundImage, addNode, updateNodePosition, removeNode, removeEdge, addEdge, updateNodeLabel, updateEdgeControlPoint } = useGraph();
   const [hoveredNode, setHoveredNode] = useState(null);
   const [draggedNode, setDraggedNode] = useState(null);
   const [isDragging, setIsDragging] = useState(false);
@@ -278,6 +278,11 @@ const MapCanvas = forwardRef((props, ref) => {
       return;
     }
 
+    // Không thêm node nếu click vào control point của edge
+    if (e.target.closest('.edge-group')) {
+      return;
+    }
+
     const { canvasX: x, canvasY: y } = getCanvasCoordinates(e.clientX, e.clientY);
 
     // Kiểm tra có click vào node nào không
@@ -349,14 +354,14 @@ const MapCanvas = forwardRef((props, ref) => {
     });
 
     if (clickedNode) {
-      // Nếu giữ Shift hoặc Ctrl, tạo cạnh
-      if (e.shiftKey || e.ctrlKey) {
+      // Nếu giữ Shift, tạo đường nối
+      if (e.shiftKey) {
         setIsCreatingEdge(true);
         setEdgeStartNode(clickedNode);
         setEdgeEndPosition({ x, y });
         e.preventDefault();
       } else {
-        // Ngược lại, kéo node
+        // Mặc định: kéo di chuyển node
         setDraggedNode(clickedNode.id);
         setIsDragging(false);
         e.preventDefault();
@@ -440,14 +445,16 @@ const MapCanvas = forwardRef((props, ref) => {
           transformOrigin: '0 0',
           transition: 'transform 0.2s ease-out'
         }}>
-          {/* Đường cong khi đang tạo cạnh */}
+          {/* Đường thẳng khi đang tạo cạnh */}
           {isCreatingEdge && edgeStartNode && edgeEndPosition && (
             <g>
-              <path
-                d={`M ${edgeStartNode.x} ${edgeStartNode.y} Q ${(edgeStartNode.x + edgeEndPosition.x) / 2} ${(edgeStartNode.y + edgeEndPosition.y) / 2 - 50} ${edgeEndPosition.x} ${edgeEndPosition.y}`}
+              <line
+                x1={edgeStartNode.x}
+                y1={edgeStartNode.y}
+                x2={edgeEndPosition.x}
+                y2={edgeEndPosition.y}
                 stroke="#8b5cf6"
                 strokeWidth="3"
-                fill="none"
                 strokeDasharray="8,4"
                 opacity="0.8"
                 style={{
@@ -472,15 +479,17 @@ const MapCanvas = forwardRef((props, ref) => {
             if (!fromNode || !toNode) return null;
             
             const distance = calculateDistance(fromNode, toNode);
+            const edgeId = edge.id || `${edge.from}-${edge.to}`;
             return (
               <Edge
-                key={`edge-${edge.from}-${edge.to}`}
+                key={edgeId}
+                edgeId={edgeId}
                 from={fromNode}
                 to={toNode}
                 isMst={false}
-                isDefault={!edge.isCurved}
-                isCurved={edge.isCurved || false}
-                curveDirection={edge.curveDirection || 1}
+                isDefault={false}
+                controlPoint={edge.controlPoint}
+                onControlPointDrag={updateEdgeControlPoint}
                 weight={distance}
                 distanceScale={distanceScale}
               />
