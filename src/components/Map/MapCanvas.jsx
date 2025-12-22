@@ -46,6 +46,12 @@ const MapCanvas = forwardRef((props, ref) => {
   const [zoom, setZoom] = useState(1);
   const [panX, setPanX] = useState(0);
   const [panY, setPanY] = useState(0);
+  
+  // State cho modal sửa độ dài cạnh
+  const [isEditWeightModalOpen, setIsEditWeightModalOpen] = useState(false);
+  const [selectedEdgeForEdit, setSelectedEdgeForEdit] = useState(null);
+  const [newWeightInput, setNewWeightInput] = useState('');
+  const [weightError, setWeightError] = useState('');
 
   /**
    * Đảm bảo SVG luôn có đúng kích thước
@@ -327,23 +333,21 @@ const MapCanvas = forwardRef((props, ref) => {
             // Xóa đường ray
             removeEdge(fromNode.id, toNode.id);
           } else if (isEditEdgeMode) {
-            // Sửa độ dài đường ray
+            // Sửa độ dài đường ray - mở modal
             const currentDistance = calculateDistance(
-              fromNode.x, fromNode.y,
-              toNode.x, toNode.y,
-              distanceScale
+              fromNode, toNode
             );
-            const newDistance = prompt(
-              `Độ dài hiện tại: ${currentDistance.toFixed(2)} km\n\nNhập độ dài mới (km):`,
-              currentDistance.toFixed(2)
-            );
+            const currentDistanceKm = currentDistance * distanceScale;
             
-            if (newDistance !== null && !isNaN(parseFloat(newDistance))) {
-              const newWeight = parseFloat(newDistance);
-              if (newWeight > 0) {
-                updateEdgeWeight(fromNode.id, toNode.id, newWeight);
-              }
-            }
+            setSelectedEdgeForEdit({
+              fromNode,
+              toNode,
+              currentWeight: edge.weight || currentDistance,
+              currentDistanceKm: currentDistanceKm
+            });
+            setNewWeightInput(currentDistanceKm.toFixed(2));
+            setWeightError('');
+            setIsEditWeightModalOpen(true);
           } else if (isMarkRequiredMode) {
             // Đánh dấu/bỏ đánh dấu đường ray bắt buộc
             console.log('Toggling required for edge:', edge.from, edge.to);
@@ -585,7 +589,7 @@ const MapCanvas = forwardRef((props, ref) => {
                 isRequired={edge.isRequired || false}
                 controlPoint={edge.controlPoint}
                 onControlPointDrag={updateEdgeControlPoint}
-                weight={distance}
+                weight={edge.weight || distance}
                 distanceScale={distanceScale}
               />
             );
@@ -702,6 +706,165 @@ const MapCanvas = forwardRef((props, ref) => {
                   cursor: 'pointer',
                   fontSize: '14px',
                   fontWeight: '500',
+                }}
+              >
+                Lưu
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal sửa độ dài cạnh */}
+      {isEditWeightModalOpen && selectedEdgeForEdit && (
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          backgroundColor: 'rgba(0, 0, 0, 0.7)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          zIndex: 9999,
+        }} onClick={() => {
+          setIsEditWeightModalOpen(false);
+          setWeightError('');
+        }}>
+          <div style={{
+            backgroundColor: '#1e293b',
+            padding: '24px',
+            borderRadius: '12px',
+            border: '1px solid #334155',
+            boxShadow: '0 10px 40px rgba(0, 0, 0, 0.5)',
+            minWidth: '400px',
+          }} onClick={(e) => e.stopPropagation()}>
+            <h3 style={{
+              color: '#00d4ff',
+              margin: '0 0 16px 0',
+              fontSize: '18px',
+              fontWeight: '600',
+            }}>
+              Sửa Độ Dài Đường Ray
+            </h3>
+            
+            <div style={{ marginBottom: '16px' }}>
+              <p style={{ color: '#94a3b8', fontSize: '14px', margin: '0 0 8px 0' }}>
+                Từ: <strong style={{ color: '#ffffff' }}>{selectedEdgeForEdit.fromNode.label}</strong>
+              </p>
+              <p style={{ color: '#94a3b8', fontSize: '14px', margin: '0 0 8px 0' }}>
+                Đến: <strong style={{ color: '#ffffff' }}>{selectedEdgeForEdit.toNode.label}</strong>
+              </p>
+              <p style={{ color: '#94a3b8', fontSize: '14px', margin: '0 0 12px 0' }}>
+                Độ dài hiện tại: <strong style={{ color: '#2ed573' }}>{selectedEdgeForEdit.currentDistanceKm.toFixed(2)} km</strong>
+              </p>
+            </div>
+
+            <div style={{ marginBottom: '16px' }}>
+              <label style={{
+                display: 'block',
+                color: '#e2e8f0',
+                fontSize: '14px',
+                fontWeight: '500',
+                marginBottom: '8px',
+              }}>
+                Độ dài mới (km):
+              </label>
+              <input
+                type="number"
+                step="0.01"
+                value={newWeightInput}
+                onChange={(e) => {
+                  setNewWeightInput(e.target.value);
+                  setWeightError('');
+                }}
+                style={{
+                  width: '100%',
+                  padding: '10px 12px',
+                  backgroundColor: '#0f172a',
+                  border: `1px solid ${weightError ? '#ff4757' : '#334155'}`,
+                  borderRadius: '6px',
+                  color: '#ffffff',
+                  fontSize: '14px',
+                  outline: 'none',
+                  boxSizing: 'border-box',
+                }}
+                autoFocus
+              />
+              {weightError && (
+                <p style={{
+                  color: '#ff4757',
+                  fontSize: '12px',
+                  margin: '6px 0 0 0',
+                }}>
+                  {weightError}
+                </p>
+              )}
+            </div>
+
+            <div style={{ 
+              display: 'flex', 
+              gap: '12px',
+              justifyContent: 'flex-end',
+            }}>
+              <button
+                onClick={() => {
+                  setIsEditWeightModalOpen(false);
+                  setWeightError('');
+                }}
+                style={{
+                  padding: '10px 20px',
+                  backgroundColor: '#475569',
+                  color: 'white',
+                  border: 'none',
+                  borderRadius: '6px',
+                  cursor: 'pointer',
+                  fontSize: '14px',
+                  fontWeight: '500',
+                }}
+              >
+                Hủy
+              </button>
+              <button
+                onClick={() => {
+                  console.log('Save button clicked');
+                  console.log('Selected edge:', selectedEdgeForEdit);
+                  console.log('New weight input:', newWeightInput);
+                  
+                  const newWeightKm = parseFloat(newWeightInput);
+                  console.log('Parsed weight (km):', newWeightKm);
+                  
+                  if (isNaN(newWeightKm)) {
+                    console.log('Invalid number');
+                    setWeightError('Vui lòng nhập số hợp lệ');
+                    return;
+                  }
+                  
+                  if (newWeightKm <= 0) {
+                    console.log('Weight <= 0');
+                    setWeightError('Độ dài phải lớn hơn 0');
+                    return;
+                  }
+                  
+                  // Convert km sang pixels để lưu vào edge.weight
+                  const newWeightPixels = newWeightKm / distanceScale;
+                  console.log('Calling updateEdgeWeight with:', selectedEdgeForEdit.fromNode.id, selectedEdgeForEdit.toNode.id, 'pixels:', newWeightPixels);
+                  
+                  // Cập nhật weight (đơn vị pixels)
+                  updateEdgeWeight(selectedEdgeForEdit.fromNode.id, selectedEdgeForEdit.toNode.id, newWeightPixels);
+                  setIsEditWeightModalOpen(false);
+                  setWeightError('');
+                }}
+                style={{
+                  padding: '10px 20px',
+                  backgroundColor: '#00d4ff',
+                  color: '#0a1628',
+                  border: 'none',
+                  borderRadius: '6px',
+                  cursor: 'pointer',
+                  fontSize: '14px',
+                  fontWeight: '600',
                 }}
               >
                 Lưu

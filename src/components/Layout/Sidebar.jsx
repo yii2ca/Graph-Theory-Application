@@ -36,6 +36,7 @@ const Sidebar = () => {
     toggleEditEdgeMode,
     toggleMarkRequiredMode,
     toggleSelectStartNodeMode,
+    setExecutionLogs,
     edges: allEdges = [],
   } = useGraph();
 
@@ -184,7 +185,10 @@ const Sidebar = () => {
             <Button
               variant="danger"
               size="md"
-              onClick={clearGraph}
+              onClick={() => {
+                clearGraph();
+                setExecutionLogs([]);
+              }}
               className="sidebar__full-btn"
             >
               Xóa Tất Cả
