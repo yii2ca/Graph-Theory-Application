@@ -73,9 +73,10 @@ export const kruskalMST = (nodes, edges = []) => {
  * 
  * @param {Array} nodes - Mảng các đỉnh
  * @param {Array} edges - Mảng các cạnh từ graph
+ * @param {number} startNodeId - ID của đỉnh khởi đầu (optional)
  * @returns {Object} - { mstEdges: Array, totalCost: number }
  */
-export const primMST = (nodes, edges = []) => {
+export const primMST = (nodes, edges = [], startNodeId = null) => {
   if (nodes.length < 2) {
     return { mstEdges: [], totalCost: 0 };
   }
@@ -112,9 +113,11 @@ export const primMST = (nodes, edges = []) => {
   const mstEdges = [];
   let totalCost = 0;
 
-  // Bắt đầu từ đỉnh đầu tiên
-  const startNodeId = nodes[0].id;
-  visited.add(startNodeId);
+  // Bắt đầu từ đỉnh được chọn hoặc đỉnh đầu tiên
+  const actualStartNodeId = startNodeId !== null && nodes.find(n => n.id === startNodeId)
+    ? startNodeId
+    : nodes[0].id;
+  visited.add(actualStartNodeId);
 
   while (visited.size < nodes.length) {
     let minEdge = null;

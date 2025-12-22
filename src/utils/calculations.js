@@ -65,7 +65,7 @@ export const formatNumber = (num, decimals = 2) => {
  * @returns {number} - Khoảng cách km
  */
 export const pixelsToKm = (pixels, scale = 0.05) => {
-  return (pixels * scale).toFixed(1);
+  return pixels * scale;
 };
 
 /**

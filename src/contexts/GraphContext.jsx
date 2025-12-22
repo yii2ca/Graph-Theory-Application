@@ -53,6 +53,13 @@ export const GraphProvider = ({ children }) => {
   const [isEditEdgeMode, setIsEditEdgeMode] = useState(false);
   const [isMarkRequiredMode, setIsMarkRequiredMode] = useState(false);
 
+  // State cho execution logs (lịch sử thực thi thuật toán)
+  const [executionLogs, setExecutionLogs] = useState([]);
+
+  // State cho đỉnh khởi đầu của thuật toán Prim
+  const [primStartNode, setPrimStartNode] = useState(null);
+  const [isSelectStartNodeMode, setIsSelectStartNodeMode] = useState(false);
+
   /**
    * Thêm node mới vào đồ thị
    * @param {number} x - Tọa độ x
@@ -271,6 +278,7 @@ export const GraphProvider = ({ children }) => {
     setIsDeleteEdgeMode(false);
     setIsEditEdgeMode(false);
     setIsMarkRequiredMode(false);
+    setIsSelectStartNodeMode(false);
     // Toggle chế độ thêm edge
     setIsAddEdgeMode(!isAddEdgeMode);
     setSelectedNodeForEdge(null);
@@ -285,6 +293,7 @@ export const GraphProvider = ({ children }) => {
     setIsDeleteEdgeMode(false);
     setIsEditEdgeMode(false);
     setIsMarkRequiredMode(false);
+    setIsSelectStartNodeMode(false);
     setIsDeleteNodeMode(!isDeleteNodeMode);
   };
 
@@ -297,6 +306,7 @@ export const GraphProvider = ({ children }) => {
     setIsDeleteNodeMode(false);
     setIsEditEdgeMode(false);
     setIsMarkRequiredMode(false);
+    setIsSelectStartNodeMode(false);
     setIsDeleteEdgeMode(!isDeleteEdgeMode);
   };
 
@@ -309,6 +319,7 @@ export const GraphProvider = ({ children }) => {
     setIsDeleteNodeMode(false);
     setIsDeleteEdgeMode(false);
     setIsMarkRequiredMode(false);
+    setIsSelectStartNodeMode(false);
     setIsEditEdgeMode(!isEditEdgeMode);
   };
 
@@ -321,7 +332,21 @@ export const GraphProvider = ({ children }) => {
     setIsDeleteNodeMode(false);
     setIsDeleteEdgeMode(false);
     setIsEditEdgeMode(false);
+    setIsSelectStartNodeMode(false);
     setIsMarkRequiredMode(!isMarkRequiredMode);
+  };
+
+  /**
+   * Bật/tắt chế độ chọn đỉnh khởi đầu cho Prim
+   */
+  const toggleSelectStartNodeMode = () => {
+    setIsAddEdgeMode(false);
+    setSelectedNodeForEdge(null);
+    setIsDeleteNodeMode(false);
+    setIsDeleteEdgeMode(false);
+    setIsEditEdgeMode(false);
+    setIsMarkRequiredMode(false);
+    setIsSelectStartNodeMode(!isSelectStartNodeMode);
   };
 
   /**
@@ -343,6 +368,15 @@ export const GraphProvider = ({ children }) => {
     }
   };
 
+  /**
+   * Xử lý click vào node khi ở chế độ chọn đỉnh khởi đầu
+   */
+  const handleNodeClickForStartNode = (nodeId) => {
+    if (!isSelectStartNodeMode) return;
+    setPrimStartNode(nodeId);
+    setIsSelectStartNodeMode(false);
+  };
+
   const value = {
     nodes,
     edges,
@@ -359,6 +393,9 @@ export const GraphProvider = ({ children }) => {
     isDeleteEdgeMode,
     isEditEdgeMode,
     isMarkRequiredMode,
+    executionLogs,
+    primStartNode,
+    isSelectStartNodeMode,
     setNodes,
     setEdges,
     setMstEdges,
@@ -368,6 +405,7 @@ export const GraphProvider = ({ children }) => {
     setAlgorithm,
     setDistanceScale,
     setBackgroundImage,
+    setExecutionLogs,
     addNode,
     removeNode,
     removeEdge,
@@ -385,7 +423,10 @@ export const GraphProvider = ({ children }) => {
     toggleEditEdgeMode,
     toggleMarkRequiredMode,
     updateEdgeWeight,
-    toggleEdgeRequired
+    toggleEdgeRequired,
+    toggleSelectStartNodeMode,
+    handleNodeClickForStartNode,
+    setPrimStartNode
   };
 
   return (

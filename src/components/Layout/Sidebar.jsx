@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Activity, Plus, Map, MapPin, HelpCircle, GitBranch, Trash2, Edit3, Lock } from 'lucide-react';
+import { Activity, Plus, Map, MapPin, HelpCircle, GitBranch, Trash2, Edit3, Lock, Play } from 'lucide-react';
 import { useGraph } from '../../contexts/GraphContext';
 import { pixelsToKm } from '../../utils/calculations';
 import Card from '../UI/Card';
@@ -23,6 +23,8 @@ const Sidebar = () => {
     isDeleteEdgeMode,
     isEditEdgeMode,
     isMarkRequiredMode,
+    primStartNode,
+    isSelectStartNodeMode,
     setAlgorithm,
     setDistanceScale,
     setBackgroundImage,
@@ -33,6 +35,7 @@ const Sidebar = () => {
     toggleDeleteEdgeMode,
     toggleEditEdgeMode,
     toggleMarkRequiredMode,
+    toggleSelectStartNodeMode,
     edges: allEdges = [],
   } = useGraph();
 

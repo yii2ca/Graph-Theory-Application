@@ -1,5 +1,5 @@
 import React, { useRef } from 'react';
-import { Download, Play, Activity } from 'lucide-react';
+import { Download, Play, Activity, ListOrdered, Trash2 } from 'lucide-react';
 import { useGraph } from '../../contexts/GraphContext';
 import { useMST } from '../../hooks/useMST';
 import { pixelsToKm } from '../../utils/calculations';
@@ -14,11 +14,21 @@ const RightSidebar = ({ mapCanvasRef }) => {
     algorithm,
     totalCost,
     distanceScale,
+    executionLogs,
+    primStartNode,
     setMstEdges,
     setTotalCost,
+    setExecutionLogs,
   } = useGraph();
 
-  const { findMST, isAnimating } = useMST(nodes, edges, setMstEdges, setTotalCost);
+  const { findMST, isAnimating } = useMST(nodes, edges, setMstEdges, setTotalCost, setExecutionLogs, distanceScale, primStartNode);
+
+  /**
+   * Xóa log thực thi
+   */
+  const handleClearLogs = () => {
+    setExecutionLogs([]);
+  };
 
   /**
    * Xuất đồ thị thành file ảnh PNG
@@ -111,13 +121,58 @@ const RightSidebar = ({ mapCanvasRef }) => {
               <span className="right-sidebar__stat-value">{edges.length}</span>
             </div>
             <div className="right-sidebar__stat-item highlight">
-              <span className="right-sidebar__stat-label">Tổng chi phí:</span>
+              <span className="right-sidebar__stat-label">Tổng:</span>
               <span className="right-sidebar__stat-value cost">
-                {pixelsToKm(totalCost, distanceScale)} km
+                {pixelsToKm(totalCost, distanceScale).toFixed(2)} km
               </span>
             </div>
           </div>
         </Card>
+
+        {/* Execution Logs */}
+        {executionLogs && executionLogs.length > 0 && (
+          <Card
+            title="Lịch Sử Thực Thi"
+            icon={ListOrdered}
+            variant="info"
+            collapsible
+            defaultOpen
+          >
+            <div className="execution-logs">
+              <div className="execution-logs__header">
+                <Button
+                  variant="danger"
+                  size="sm"
+                  onClick={handleClearLogs}
+                  icon={Trash2}
+                >
+                  Xóa log
+                </Button>
+              </div>
+              <div className="execution-logs__list">
+                {executionLogs.map((log, index) => (
+                  <div 
+                    key={index} 
+                    className={`execution-log-item execution-log-item--${log.type}`}
+                  >
+                    <div className="execution-log-item__header">
+                      <span className="execution-log-item__step">
+                        {log.type === 'start' ? '🚀' : 
+                         log.type === 'end' ? '✓' : 
+                         log.type === 'error' ? '✗' : 
+                         `#${log.step}`}
+                      </span>
+                      <span className="execution-log-item__time">{log.timestamp}</span>
+                    </div>
+                    <div className="execution-log-item__content">
+                      <p className="execution-log-item__message">{log.message}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </Card>
+        )}
 
         {/* Execute Algorithm Button */}
         <Button
