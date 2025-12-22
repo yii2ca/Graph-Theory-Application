@@ -1,57 +1,51 @@
-/* Card Component Styles */
+/* Card Component Styles - Blueprint Railway Theme */
 
 .card {
-  border-radius: var(--radius-xl);
+  border-radius: var(--radius-md);
   border: 1px solid var(--color-border);
   overflow: hidden;
-  background: linear-gradient(135deg, 
-    rgba(139, 92, 246, 0.05) 0%, 
-    rgba(236, 72, 153, 0.05) 100%
-  );
-  backdrop-filter: blur(10px);
-  box-shadow: var(--shadow-sm);
+  background: var(--color-bg-card);
+  backdrop-filter: blur(12px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
   transition: all var(--transition-base);
 }
 
 .card:hover {
-  box-shadow: var(--shadow-md);
-  border-color: var(--color-primary-light);
+  box-shadow: 0 3px 12px rgba(0, 0, 0, 0.2);
+  border-color: var(--color-primary-dark);
 }
 
 /* === CARD VARIANTS === */
 
 /* Primary Card */
 .card--primary {
-  border-color: rgba(139, 92, 246, 0.3);
+  border-color: var(--color-border);
   background: linear-gradient(135deg,
-    rgba(139, 92, 246, 0.08) 0%,
-    rgba(236, 72, 153, 0.08) 100%
+    rgba(0, 212, 255, 0.05) 0%,
+    rgba(0, 168, 204, 0.05) 100%
   );
 }
 
 .card--primary:hover {
-  border-color: var(--color-primary-light);
+  border-color: var(--color-primary);
 }
 
 /* Secondary Card */
 .card--secondary {
-  border-color: rgba(59, 130, 246, 0.3);
-  background: linear-gradient(135deg,
-    rgba(59, 130, 246, 0.08) 0%,
-    rgba(34, 211, 238, 0.08) 100%
-  );
+  border-color: var(--color-border-light);
+  background: var(--color-bg-card);
 }
 
 .card--secondary:hover {
-  border-color: var(--color-info);
+  border-color: var(--color-border);
 }
 
 /* Success Card */
 .card--success {
-  border-color: rgba(16, 185, 129, 0.3);
+  border-color: rgba(46, 213, 115, 0.3);
   background: linear-gradient(135deg,
-    rgba(16, 185, 129, 0.08) 0%,
-    rgba(34, 197, 94, 0.08) 100%
+    rgba(46, 213, 115, 0.05) 0%,
+    rgba(46, 213, 115, 0.02) 100%
   );
 }
 
@@ -61,10 +55,10 @@
 
 /* Danger Card */
 .card--danger {
-  border-color: rgba(239, 68, 68, 0.3);
+  border-color: rgba(255, 71, 87, 0.3);
   background: linear-gradient(135deg,
-    rgba(239, 68, 68, 0.08) 0%,
-    rgba(252, 165, 165, 0.08) 100%
+    rgba(255, 71, 87, 0.05) 0%,
+    rgba(255, 71, 87, 0.02) 100%
   );
 }
 
@@ -74,28 +68,33 @@
 
 /* === CARD HEADER === */
 .card__header {
-  padding: var(--spacing-4);
-  border-bottom: 1px solid var(--color-border);
+  padding: var(--spacing-3);
+  border-bottom: 1px solid var(--color-border-light);
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: var(--spacing-3);
+  gap: var(--spacing-2);
+  background: rgba(0, 212, 255, 0.03);
+  transition: all var(--transition-base);
 }
 
 .card__header--collapsible {
   cursor: pointer;
   user-select: none;
-  transition: background-color var(--transition-base);
 }
 
 .card__header--collapsible:hover {
-  background-color: rgba(139, 92, 246, 0.05);
+  background: rgba(0, 212, 255, 0.08);
+}
+
+.card__header--collapsible:active {
+  background: rgba(0, 212, 255, 0.12);
 }
 
 .card__header-content {
   display: flex;
   align-items: center;
-  gap: var(--spacing-3);
+  gap: var(--spacing-2);
   flex: 1;
   min-width: 0;
 }
@@ -103,25 +102,27 @@
 .card__icon {
   flex-shrink: 0;
   color: var(--color-primary);
-  width: 20px;
-  height: 20px;
+  width: 16px;
+  height: 16px;
 }
 
 .card__title {
-  font-size: var(--font-size-lg);
+  font-size: var(--font-size-sm);
   font-weight: var(--font-weight-semibold);
   color: var(--color-text-primary);
   margin: 0;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
 }
 
 .card__chevron {
   flex-shrink: 0;
-  color: var(--color-text-secondary);
-  width: 20px;
-  height: 20px;
+  color: var(--color-text-tertiary);
+  width: 16px;
+  height: 16px;
   transition: transform var(--transition-base);
 }
 
@@ -131,7 +132,7 @@
 
 /* === CARD BODY === */
 .card__body {
-  padding: var(--spacing-4);
+  padding: var(--spacing-3);
 }
 
 /* === COLLAPSIBLE CONTENT === */
@@ -145,8 +146,8 @@
 .card__content--open {
   max-height: 2000px;
   opacity: 1;
-  padding: var(--spacing-4);
-  border-top: 1px solid var(--color-border);
+  padding: var(--spacing-3);
+  border-top: 1px solid var(--color-border-light);
 }
 
 .card__content--closed {

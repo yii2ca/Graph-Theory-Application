@@ -1,23 +1,15 @@
 import React, { useState } from 'react';
-import { Menu, X, HelpCircle, Train } from 'lucide-react';
+import { Menu, X, Train } from 'lucide-react';
 import { useGraph } from '../../contexts/GraphContext';
-import { useMST } from '../../hooks/useMST';
-import { Button } from '../UI';
 import Modal from '../UI/Modal';
 import './Header.css';
 
 const Header = () => {
   const {
-    nodes,
     isMenuOpen,
     setIsMenuOpen,
-    algorithm = 'kruskal',
-    setAlgorithm,
-    setMstEdges,
-    setTotalCost,
   } = useGraph();
 
-  const { findMST, isAnimating } = useMST(nodes, setMstEdges, setTotalCost);
   const [isHelpOpen, setIsHelpOpen] = useState(false);
 
   return (
@@ -35,46 +27,10 @@ const Header = () => {
           <div className="header__logo">
             <Train size={28} />
             <div className="header__branding">
-              <h1 className="header__title">Hệ Thống Đường Sắt Tối Ưu</h1>
-              <p className="header__subtitle">Minimum Spanning Tree Visualization</p>
+              <h1 className="header__title">Ứng dụng đường sắt tối ưu</h1>
+              {/* <p className="header__subtitle">Minimum Spanning Tree Visualization</p> */}
             </div>
           </div>
-        </div>
-
-        <div className="header__center">
-          <div className="header__algorithm-group">
-            <label className="header__label">Thuật toán:</label>
-            <select
-              value={algorithm}
-              onChange={(e) => setAlgorithm?.(e.target.value)}
-              className="header__select"
-            >
-              <option value="kruskal">Kruskal</option>
-              <option value="prim">Prim</option>
-            </select>
-          </div>
-        </div>
-
-        <div className="header__right">
-          <Button
-            variant="success"
-            size="md"
-            onClick={() => {
-              findMST(algorithm);
-            }}
-            loading={isAnimating}
-          >
-            ▶ Thực thi
-          </Button>
-
-          <Button
-            variant="secondary"
-            size="md"
-            icon={HelpCircle}
-            onClick={() => setIsHelpOpen(true)}
-          >
-            Hướng dẫn
-          </Button>
         </div>
       </header>
 

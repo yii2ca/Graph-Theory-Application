@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { ZoomIn, ZoomOut, Maximize2, Download, ArrowUp, ArrowDown, ArrowLeft, ArrowRight, GripVertical } from 'lucide-react';
 import './ToolBar.css';
 
@@ -7,10 +7,28 @@ import './ToolBar.css';
  */
 const ToolBar = ({ onZoomIn, onZoomOut, onFitScreen, onDownload, onPanUp, onPanDown, onPanLeft, onPanRight }) => {
   const [isVisible, setIsVisible] = useState(true);
-  const [position, setPosition] = useState({ x: 0, y: 0 });
+  
+  // Load position from localStorage
+  const getInitialPosition = () => {
+    try {
+      const saved = localStorage.getItem('toolbar-position');
+      return saved ? JSON.parse(saved) : { x: 0, y: 0 };
+    } catch {
+      return { x: 0, y: 0 };
+    }
+  };
+  
+  const [position, setPosition] = useState(getInitialPosition);
   const [isDragging, setIsDragging] = useState(false);
   const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
   const toolbarRef = useRef(null);
+
+  // Save position to localStorage whenever it changes
+  useEffect(() => {
+    if (position.x !== 0 || position.y !== 0) {
+      localStorage.setItem('toolbar-position', JSON.stringify(position));
+    }
+  }, [position]);
 
   const handleMouseDown = (e) => {
     setIsDragging(true);
@@ -33,7 +51,7 @@ const ToolBar = ({ onZoomIn, onZoomOut, onFitScreen, onDownload, onPanUp, onPanD
     setIsDragging(false);
   };
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (isDragging) {
       window.addEventListener('mousemove', handleMouseMove);
       window.addEventListener('mouseup', handleMouseUp);

@@ -4,7 +4,7 @@ import { kruskalMST, primMST } from '../algorithms/mst';
 /**
  * Custom hook để xử lý MST algorithm
  */
-export const useMST = (nodes, setMstEdges, setTotalCost) => {
+export const useMST = (nodes, edges, setMstEdges, setTotalCost) => {
   const [isAnimating, setIsAnimating] = useState(false);
 
   /**
@@ -17,15 +17,20 @@ export const useMST = (nodes, setMstEdges, setTotalCost) => {
       return;
     }
 
+    if (!edges || edges.length === 0) {
+      console.warn('Cần ít nhất 1 cạnh để tính MST');
+      return;
+    }
+
     setIsAnimating(true);
     setMstEdges([]);
     setTotalCost(0);
 
     try {
-      // Chọn thuật toán
+      // Chọn thuật toán - truyền edges vào
       const result = algorithm === 'prim' 
-        ? primMST(nodes) 
-        : kruskalMST(nodes);
+        ? primMST(nodes, edges) 
+        : kruskalMST(nodes, edges);
 
       // Kiểm tra kết quả
       if (!result || !result.mstEdges) {
