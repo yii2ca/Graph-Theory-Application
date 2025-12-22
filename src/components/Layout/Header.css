@@ -1,37 +1,43 @@
-/* Header Component Styles */
+/* Header Component Styles - Blueprint Railway Theme */
 
 .header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: var(--spacing-6);
-  padding: var(--spacing-4) var(--spacing-6);
-  background: linear-gradient(180deg, rgba(22, 33, 62, 0.95) 0%, rgba(15, 52, 96, 0.9) 100%);
+  gap: var(--spacing-4);
+  padding: var(--spacing-2) var(--spacing-4);
+  background: linear-gradient(180deg, 
+    rgba(10, 22, 40, 0.98) 0%, 
+    rgba(13, 31, 60, 0.95) 100%
+  );
   border-bottom: 1px solid var(--color-border);
-  backdrop-filter: blur(12px);
-  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.3);
+  backdrop-filter: blur(16px);
+  box-shadow: 
+    0 2px 20px rgba(0, 0, 0, 0.4),
+    0 0 40px rgba(0, 212, 255, 0.05);
   position: sticky;
   top: 0;
   z-index: 100;
+  height: 56px;
 }
 
 /* === LEFT SECTION === */
 .header__left {
   display: flex;
   align-items: center;
-  gap: var(--spacing-4);
+  gap: var(--spacing-3);
   flex: 0 1 auto;
   min-width: 0;
 }
 
 .header__menu-btn {
-  display: none;
+  display: flex;
   align-items: center;
   justify-content: center;
-  width: 40px;
-  height: 40px;
+  width: 36px;
+  height: 36px;
   border-radius: var(--radius-md);
-  border: none;
+  border: 1px solid var(--color-border);
   background-color: transparent;
   color: var(--color-primary);
   cursor: pointer;
@@ -39,62 +45,66 @@
 }
 
 .header__menu-btn:hover {
-  background-color: rgba(0, 132, 255, 0.1);
-  color: var(--color-primary-light);
+  background-color: var(--color-bg-hover);
+  border-color: var(--color-primary);
+  box-shadow: var(--glow-primary);
 }
 
 .header__logo {
   display: flex;
   align-items: center;
-  gap: var(--spacing-3);
+  gap: var(--spacing-2);
   min-width: 0;
 }
 
 .header__logo svg {
   flex-shrink: 0;
   color: var(--color-primary);
-  width: 28px;
-  height: 28px;
+  width: 24px;
+  height: 24px;
+  filter: drop-shadow(0 0 6px rgba(0, 212, 255, 0.6));
 }
 
 .header__branding {
   min-width: 0;
   display: flex;
   flex-direction: column;
-  gap: var(--spacing-1);
+  gap: 2px;
 }
 
 .header__title {
   margin: 0;
-  font-size: var(--font-size-lg);
+  font-size: var(--font-size-base);
   font-weight: var(--font-weight-bold);
   color: var(--color-text-primary);
-  background: linear-gradient(90deg, #0084ff, #00b84d);
+  background: linear-gradient(90deg, #00d4ff, #2ed573);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  letter-spacing: 0.3px;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
 }
 
 .header__subtitle {
   margin: 0;
-  font-size: var(--font-size-xs);
+  font-size: 10px;
   color: var(--color-text-tertiary);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
   text-transform: uppercase;
-  letter-spacing: 0.5px;
+  letter-spacing: 1px;
+  font-family: var(--font-family-mono);
 }
 
 /* === CENTER SECTION === */
 .header__center {
   display: flex;
   align-items: center;
-  gap: var(--spacing-6);
+  gap: var(--spacing-4);
   flex: 1;
   justify-content: center;
 }
@@ -102,15 +112,15 @@
 .header__algorithm-group {
   display: flex;
   align-items: center;
-  gap: var(--spacing-3);
-  padding: var(--spacing-3) var(--spacing-4);
-  background-color: rgba(139, 92, 246, 0.05);
-  border-radius: var(--radius-lg);
+  gap: var(--spacing-2);
+  padding: var(--spacing-2) var(--spacing-3);
+  background-color: var(--color-bg-card);
+  border-radius: var(--radius-md);
   border: 1px solid var(--color-border);
 }
 
 .header__label {
-  font-size: var(--font-size-base);
+  font-size: var(--font-size-sm);
   font-weight: var(--font-weight-medium);
   color: var(--color-text-secondary);
   margin: 0;
@@ -118,26 +128,26 @@
 }
 
 .header__select {
-  padding: var(--spacing-2) var(--spacing-3);
+  padding: var(--spacing-1) var(--spacing-2);
   background-color: var(--color-bg-primary);
   border: 1px solid var(--color-border);
-  border-radius: var(--radius-md);
-  color: var(--color-text-primary);
-  font-size: var(--font-size-base);
-  font-family: var(--font-family-sans);
+  border-radius: var(--radius-sm);
+  color: var(--color-primary);
+  font-size: var(--font-size-sm);
+  font-family: var(--font-family-mono);
   cursor: pointer;
   transition: all var(--transition-base);
   outline: none;
 }
 
 .header__select:hover {
-  border-color: var(--color-primary-light);
-  background-color: rgba(139, 92, 246, 0.1);
+  border-color: var(--color-primary);
+  background-color: var(--color-bg-hover);
 }
 
 .header__select:focus {
   border-color: var(--color-primary);
-  box-shadow: 0 0 0 2px rgba(139, 92, 246, 0.1);
+  box-shadow: 0 0 0 2px rgba(0, 212, 255, 0.2);
 }
 
 .header__select option {

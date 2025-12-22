@@ -1,24 +1,20 @@
 import React, { useState } from 'react';
 
 /**
- * Node component - Đại diện cho một đỉnh trong đồ thị (dạng pin/marker)
+ * Node component - Đại diện cho một đỉnh trong đồ thị (kiểu Railway Station)
+ * Phong cách: Blueprint Railway Map
  */
 const Node = ({ node, isHovered, isMstNode, isDragging }) => {
   const [showTooltip, setShowTooltip] = useState(false);
   
-  // Kích thước pin
-  const pinHeight = isHovered || isDragging ? 40 : 35;
-  const pinWidth = isHovered || isDragging ? 28 : 24;
-  const circleRadius = pinWidth * 0.35;
+  // Kích thước node
+  const outerRadius = isHovered || isDragging ? 16 : 12;
+  const innerRadius = isHovered || isDragging ? 8 : 6;
   
-  // Màu sắc
-  const fillColor = isMstNode ? '#10b981' : '#6b7280';
-  const strokeColor = isHovered || isDragging ? '#fbbf24' : '#ffffff';
-
-  // Vị trí đáy pin (điểm nhọn)
-  const pinTipY = node.y;
-  const pinTopY = node.y - pinHeight;
-  const circleCenterY = pinTopY + circleRadius + 4;
+  // Màu sắc Railway Theme
+  const outerColor = isMstNode ? '#2ed573' : '#00d4ff';
+  const innerColor = isMstNode ? '#7bed9f' : '#ffffff';
+  const glowColor = isMstNode ? 'rgba(46, 213, 115, 0.6)' : 'rgba(0, 212, 255, 0.5)';
 
   return (
     <g 
@@ -27,78 +23,94 @@ const Node = ({ node, isHovered, isMstNode, isDragging }) => {
       onMouseLeave={() => setShowTooltip(false)}
       style={{ cursor: isDragging ? 'grabbing' : 'grab' }}
     >
-      {/* Bóng đổ */}
-      <ellipse
-        cx={node.x + 2}
-        cy={node.y + 3}
-        rx={pinWidth * 0.4}
-        ry={4}
-        fill="rgba(0,0,0,0.2)"
-      />
-
-      {/* Pin shape - SVG path */}
-      <path
-        d={`
-          M ${node.x} ${pinTipY}
-          C ${node.x - pinWidth * 0.3} ${pinTipY - pinHeight * 0.3}
-            ${node.x - pinWidth * 0.5} ${pinTipY - pinHeight * 0.5}
-            ${node.x - pinWidth * 0.5} ${pinTopY + pinHeight * 0.35}
-          A ${pinWidth * 0.5} ${pinWidth * 0.5} 0 1 1 ${node.x + pinWidth * 0.5} ${pinTopY + pinHeight * 0.35}
-          C ${node.x + pinWidth * 0.5} ${pinTipY - pinHeight * 0.5}
-            ${node.x + pinWidth * 0.3} ${pinTipY - pinHeight * 0.3}
-            ${node.x} ${pinTipY}
-          Z
-        `}
-        fill={fillColor}
-        stroke={strokeColor}
+      {/* Outer glow effect */}
+      <circle
+        cx={node.x}
+        cy={node.y}
+        r={outerRadius + 4}
+        fill="none"
+        stroke={glowColor}
         strokeWidth="2"
-        className="transition-all duration-150"
+        opacity={isHovered || isDragging ? 0.8 : 0.4}
         style={{
-          filter: isDragging 
-            ? 'drop-shadow(0 4px 8px rgba(0,0,0,0.4))' 
-            : 'drop-shadow(0 2px 4px rgba(0,0,0,0.3))'
+          filter: `blur(3px)`,
         }}
       />
 
-      {/* Vòng tròn trắng bên trong */}
+      {/* Outer circle - Station marker */}
       <circle
         cx={node.x}
-        cy={circleCenterY}
-        r={circleRadius}
-        fill="white"
-        opacity="0.9"
+        cy={node.y}
+        r={outerRadius}
+        fill={outerColor}
+        stroke="#ffffff"
+        strokeWidth="2"
+        style={{
+          filter: isDragging 
+            ? `drop-shadow(0 0 12px ${glowColor})` 
+            : `drop-shadow(0 0 6px ${glowColor})`,
+          transition: 'all 0.15s ease'
+        }}
       />
+
+      {/* Inner circle - Station center */}
+      <circle
+        cx={node.x}
+        cy={node.y}
+        r={innerRadius}
+        fill={innerColor}
+        opacity="0.95"
+      />
+
+      {/* Node ID label (small number) */}
+      <text
+        x={node.x}
+        y={node.y}
+        textAnchor="middle"
+        dominantBaseline="central"
+        fill={isMstNode ? '#0a1628' : '#0a1628'}
+        fontSize="8"
+        fontWeight="700"
+        fontFamily="monospace"
+        className="pointer-events-none select-none"
+      >
+        {node.id + 1}
+      </text>
 
       {/* Tooltip hiện khi hover */}
       {showTooltip && (
         <g>
           {/* Background tooltip */}
           <rect
-            x={node.x - 50}
-            y={pinTopY - 35}
-            width="100"
+            x={node.x - 55}
+            y={node.y - outerRadius - 38}
+            width="110"
             height="28"
-            rx="6"
-            fill="#1e293b"
-            opacity="0.95"
+            rx="4"
+            fill="rgba(10, 22, 40, 0.95)"
+            stroke={outerColor}
+            strokeWidth="1"
             style={{
-              filter: 'drop-shadow(0 2px 8px rgba(0,0,0,0.3))'
+              filter: 'drop-shadow(0 4px 12px rgba(0,0,0,0.4))'
             }}
           />
           {/* Mũi tên tooltip */}
           <polygon
-            points={`${node.x - 6},${pinTopY - 7} ${node.x + 6},${pinTopY - 7} ${node.x},${pinTopY}`}
-            fill="#1e293b"
+            points={`${node.x - 6},${node.y - outerRadius - 10} ${node.x + 6},${node.y - outerRadius - 10} ${node.x},${node.y - outerRadius - 4}`}
+            fill="rgba(10, 22, 40, 0.95)"
+            stroke={outerColor}
+            strokeWidth="1"
           />
           {/* Text tooltip */}
           <text
             x={node.x}
-            y={pinTopY - 17}
+            y={node.y - outerRadius - 24}
             textAnchor="middle"
             dominantBaseline="central"
-            fill="white"
-            fontSize="13"
+            fill="#ffffff"
+            fontSize="12"
             fontWeight="600"
+            fontFamily="'Inter', sans-serif"
             className="pointer-events-none select-none"
           >
             {node.label}

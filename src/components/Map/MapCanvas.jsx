@@ -10,7 +10,28 @@ import './MapCanvas.css';
  */
 const MapCanvas = forwardRef((props, ref) => {
   const canvasRef = useRef(null);
-  const { nodes, edges, mstEdges, distanceScale, backgroundImage, addNode, updateNodePosition, removeNode, removeEdge, addEdge, updateNodeLabel, updateEdgeControlPoint } = useGraph();
+  const { 
+    nodes, 
+    edges, 
+    mstEdges, 
+    distanceScale, 
+    backgroundImage, 
+    isAddEdgeMode, 
+    isDeleteNodeMode,
+    isDeleteEdgeMode,
+    isEditEdgeMode,
+    isMarkRequiredMode,
+    handleNodeClickForEdge, 
+    addNode, 
+    updateNodePosition, 
+    removeNode, 
+    removeEdge, 
+    addEdge, 
+    updateNodeLabel, 
+    updateEdgeControlPoint,
+    updateEdgeWeight,
+    toggleEdgeRequired
+  } = useGraph();
   const [hoveredNode, setHoveredNode] = useState(null);
   const [draggedNode, setDraggedNode] = useState(null);
   const [isDragging, setIsDragging] = useState(false);
@@ -278,12 +299,64 @@ const MapCanvas = forwardRef((props, ref) => {
       return;
     }
 
-    // Không thêm node nếu click vào control point của edge
-    if (e.target.closest('.edge-group')) {
+    const { canvasX: x, canvasY: y } = getCanvasCoordinates(e.clientX, e.clientY);
+
+    // Nếu đang ở chế độ xóa đường ray, sửa độ dài, hoặc đánh dấu bắt buộc
+    // Ưu tiên xử lý edge trước, không quan tâm đến node
+    if (isDeleteEdgeMode || isEditEdgeMode || isMarkRequiredMode) {
+      const edgeClickRadius = 20; // Tăng bán kính để dễ click hơn
+      
+      console.log('In edge mode, checking edges. Mode:', { isDeleteEdgeMode, isEditEdgeMode, isMarkRequiredMode });
+      
+      for (const edge of edges) {
+        const fromNode = nodes.find(n => n.id === edge.from);
+        const toNode = nodes.find(n => n.id === edge.to);
+        
+        if (!fromNode || !toNode) continue;
+        
+        const distance = pointToLineDistance(x, y, fromNode.x, fromNode.y, toNode.x, toNode.y);
+        
+        console.log(`Edge ${edge.from}-${edge.to} distance:`, distance);
+        
+        if (distance <= edgeClickRadius) {
+          console.log('Clicked on edge:', edge);
+          if (isDeleteEdgeMode) {
+            // Xóa đường ray
+            removeEdge(fromNode.id, toNode.id);
+          } else if (isEditEdgeMode) {
+            // Sửa độ dài đường ray
+            const currentDistance = calculateDistance(
+              fromNode.x, fromNode.y,
+              toNode.x, toNode.y,
+              distanceScale
+            );
+            const newDistance = prompt(
+              `Độ dài hiện tại: ${currentDistance.toFixed(2)} km\n\nNhập độ dài mới (km):`,
+              currentDistance.toFixed(2)
+            );
+            
+            if (newDistance !== null && !isNaN(parseFloat(newDistance))) {
+              const newWeight = parseFloat(newDistance);
+              if (newWeight > 0) {
+                updateEdgeWeight(fromNode.id, toNode.id, newWeight);
+              }
+            }
+          } else if (isMarkRequiredMode) {
+            // Đánh dấu/bỏ đánh dấu đường ray bắt buộc
+            console.log('Toggling required for edge:', edge.from, edge.to);
+            toggleEdgeRequired(edge.from, edge.to);
+          }
+          return;
+        }
+      }
+      // Nếu không click trúng edge nào, return luôn (không thêm node)
       return;
     }
 
-    const { canvasX: x, canvasY: y } = getCanvasCoordinates(e.clientX, e.clientY);
+    // Không thêm node nếu click vào control point của edge (chỉ khi không ở edge mode)
+    if (e.target.closest('.edge-group')) {
+      return;
+    }
 
     // Kiểm tra có click vào node nào không
     const clickRadius = getClickRadius();
@@ -291,6 +364,18 @@ const MapCanvas = forwardRef((props, ref) => {
       const distance = Math.sqrt((node.x - x) ** 2 + (node.y - y) ** 2);
       return distance <= clickRadius;
     });
+
+    // Nếu đang ở chế độ thêm đường ray và click vào node
+    if (isAddEdgeMode && clickedNode) {
+      handleNodeClickForEdge(clickedNode.id);
+      return;
+    }
+
+    // Nếu đang ở chế độ xóa trạm và click vào node
+    if (isDeleteNodeMode && clickedNode) {
+      removeNode(clickedNode.id);
+      return;
+    }
 
     // Nếu không click vào node nào, kiểm tra và thêm node mới
     if (!clickedNode) {
@@ -488,6 +573,7 @@ const MapCanvas = forwardRef((props, ref) => {
                 to={toNode}
                 isMst={false}
                 isDefault={false}
+                isRequired={edge.isRequired || false}
                 controlPoint={edge.controlPoint}
                 onControlPointDrag={updateEdgeControlPoint}
                 weight={distance}

@@ -1,91 +1,104 @@
-/* InfoPanel Component Styles */
+/* InfoPanel Component Styles - Blueprint Railway Theme */
 
 .info-panel {
   position: absolute;
-  top: var(--spacing-5);
-  right: var(--spacing-5);
-  width: 280px;
+  top: var(--spacing-3);
+  right: var(--spacing-3);
+  width: 260px;
   z-index: 50;
   animation: slideInDown var(--transition-base);
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-2);
+  max-height: calc(100vh - 100px);
+  overflow-y: auto;
 }
 
 .info-panel .card {
-  margin-bottom: var(--spacing-3);
-}
-
-.info-panel .card:last-child {
   margin-bottom: 0;
+  background: var(--color-bg-panel);
+  border: 1px solid var(--color-border);
+  backdrop-filter: blur(16px);
 }
 
 /* === STATS === */
 .info-panel__stats {
   display: flex;
   flex-direction: column;
-  gap: var(--spacing-2);
+  gap: var(--spacing-1);
 }
 
 .info-panel__stat {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: var(--spacing-2) var(--spacing-3);
-  background-color: rgba(139, 92, 246, 0.05);
-  border-radius: var(--radius-md);
+  padding: var(--spacing-2);
+  background-color: var(--color-bg-card);
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--color-border-light);
   transition: all var(--transition-base);
 }
 
 .info-panel__stat:hover {
-  background-color: rgba(139, 92, 246, 0.1);
+  background-color: var(--color-bg-hover);
+  border-color: var(--color-primary);
 }
 
 .info-panel__stat.highlight {
   background: linear-gradient(135deg,
-    rgba(139, 92, 246, 0.15) 0%,
-    rgba(16, 185, 129, 0.15) 100%
+    rgba(0, 212, 255, 0.1) 0%,
+    rgba(46, 213, 115, 0.1) 100%
   );
-  border: 1px solid rgba(139, 92, 246, 0.3);
+  border: 1px solid var(--color-success);
 }
 
 .info-panel__stat-label {
-  font-size: var(--font-size-sm);
-  color: var(--color-text-secondary);
+  font-size: var(--font-size-xs);
+  color: var(--color-text-tertiary);
   font-weight: var(--font-weight-medium);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
 }
 
 .info-panel__stat-value {
-  font-size: var(--font-size-base);
+  font-size: var(--font-size-sm);
   font-weight: var(--font-weight-bold);
-  color: var(--color-primary-light);
-  background-color: rgba(139, 92, 246, 0.2);
+  color: var(--color-primary);
+  background-color: rgba(0, 212, 255, 0.15);
   padding: var(--spacing-1) var(--spacing-2);
   border-radius: var(--radius-sm);
   font-family: var(--font-family-mono);
 }
 
 .info-panel__stat-value.success {
-  color: var(--color-success-light);
-  background-color: rgba(16, 185, 129, 0.2);
+  color: var(--color-success);
+  background-color: rgba(46, 213, 115, 0.15);
 }
 
 .info-panel__stat-value.cost {
-  color: var(--color-success-light);
-  background-color: rgba(16, 185, 129, 0.3);
-  font-size: var(--font-size-lg);
-  padding: var(--spacing-2) var(--spacing-3);
+  color: var(--color-success);
+  background-color: rgba(46, 213, 115, 0.2);
+  font-size: var(--font-size-base);
+  padding: var(--spacing-1) var(--spacing-2);
+  text-shadow: 0 0 10px rgba(46, 213, 115, 0.5);
 }
 
 .info-panel__divider {
   height: 1px;
-  background-color: var(--color-border);
-  margin: var(--spacing-2) 0;
+  background: linear-gradient(90deg, 
+    transparent, 
+    var(--color-border), 
+    transparent
+  );
+  margin: var(--spacing-1) 0;
 }
 
 /* === EDGES LIST === */
 .info-panel__edges {
   display: flex;
   flex-direction: column;
-  gap: var(--spacing-2);
-  max-height: 300px;
+  gap: var(--spacing-1);
+  max-height: 200px;
   overflow-y: auto;
 }
 
@@ -93,11 +106,12 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: var(--spacing-2) var(--spacing-3);
-  background-color: rgba(16, 185, 129, 0.05);
-  border-radius: var(--radius-md);
-  border: 1px solid rgba(16, 185, 129, 0.2);
+  padding: var(--spacing-1) var(--spacing-2);
+  background-color: var(--color-bg-card);
+  border-radius: var(--radius-sm);
+  border: 1px solid rgba(46, 213, 115, 0.2);
   transition: all var(--transition-base);
+  font-size: var(--font-size-xs);
   font-size: var(--font-size-sm);
 }
 

@@ -37,11 +37,21 @@ export const GraphProvider = ({ children }) => {
   const [algorithm, setAlgorithm] = useState('kruskal');
   
   // State cho tỷ lệ chuyển đổi pixel → km (tỷ lệ = km/pixel)
-  // Mặc định: 1 pixel = 0.5 km
-  const [distanceScale, setDistanceScale] = useState(0.5);
+  // Mặc định: 1 pixel = 0.05 km (tăng từ 0.5 lên để giảm số km hiển thị)
+  const [distanceScale, setDistanceScale] = useState(0.05);
 
   // State cho background image
   const [backgroundImage, setBackgroundImage] = useState(null);
+
+  // State cho chế độ thêm đường ray
+  const [isAddEdgeMode, setIsAddEdgeMode] = useState(false);
+  const [selectedNodeForEdge, setSelectedNodeForEdge] = useState(null);
+
+  // State cho các chế độ thao tác khác
+  const [isDeleteNodeMode, setIsDeleteNodeMode] = useState(false);
+  const [isDeleteEdgeMode, setIsDeleteEdgeMode] = useState(false);
+  const [isEditEdgeMode, setIsEditEdgeMode] = useState(false);
+  const [isMarkRequiredMode, setIsMarkRequiredMode] = useState(false);
 
   /**
    * Thêm node mới vào đồ thị
@@ -86,6 +96,43 @@ export const GraphProvider = ({ children }) => {
     // Cũng xóa tất cả edges liên quan đến node này
     setEdges(edges.filter(e => e.from !== nodeId && e.to !== nodeId));
     setMstEdges(mstEdges.filter(e => e.from !== nodeId && e.to !== nodeId));
+  };
+
+  /**
+   * Cập nhật trọng số/độ dài của cạnh
+   * @param {number} fromId - ID của đỉnh xuất phát
+   * @param {number} toId - ID của đỉnh đích
+   * @param {number} newWeight - Trọng số mới
+   */
+  const updateEdgeWeight = (fromId, toId, newWeight) => {
+    setEdges(edges.map(edge => {
+      if ((edge.from === fromId && edge.to === toId) || 
+          (edge.from === toId && edge.to === fromId)) {
+        return { ...edge, weight: newWeight };
+      }
+      return edge;
+    }));
+  };
+
+  /**
+   * Đánh dấu/bỏ đánh dấu cạnh là bắt buộc (phải đi qua)
+   * @param {number} fromId - ID của đỉnh xuất phát
+   * @param {number} toId - ID của đỉnh đích
+   */
+  const toggleEdgeRequired = (fromId, toId) => {
+    console.log('toggleEdgeRequired called:', fromId, toId);
+    setEdges(prevEdges => {
+      const newEdges = prevEdges.map(edge => {
+        if ((edge.from === fromId && edge.to === toId) || 
+            (edge.from === toId && edge.to === fromId)) {
+          console.log('Found edge to toggle:', edge, 'isRequired was:', edge.isRequired);
+          return { ...edge, isRequired: !edge.isRequired };
+        }
+        return edge;
+      });
+      console.log('New edges after toggle:', newEdges);
+      return newEdges;
+    });
   };
 
   /**
@@ -215,6 +262,87 @@ export const GraphProvider = ({ children }) => {
     setTotalCost(0);
   };
 
+  /**
+   * Bật/tắt chế độ thêm đường ray
+   */
+  const toggleAddEdgeMode = () => {
+    // Tắt các chế độ khác
+    setIsDeleteNodeMode(false);
+    setIsDeleteEdgeMode(false);
+    setIsEditEdgeMode(false);
+    setIsMarkRequiredMode(false);
+    // Toggle chế độ thêm edge
+    setIsAddEdgeMode(!isAddEdgeMode);
+    setSelectedNodeForEdge(null);
+  };
+
+  /**
+   * Bật/tắt chế độ xóa trạm
+   */
+  const toggleDeleteNodeMode = () => {
+    setIsAddEdgeMode(false);
+    setSelectedNodeForEdge(null);
+    setIsDeleteEdgeMode(false);
+    setIsEditEdgeMode(false);
+    setIsMarkRequiredMode(false);
+    setIsDeleteNodeMode(!isDeleteNodeMode);
+  };
+
+  /**
+   * Bật/tắt chế độ xóa đường ray
+   */
+  const toggleDeleteEdgeMode = () => {
+    setIsAddEdgeMode(false);
+    setSelectedNodeForEdge(null);
+    setIsDeleteNodeMode(false);
+    setIsEditEdgeMode(false);
+    setIsMarkRequiredMode(false);
+    setIsDeleteEdgeMode(!isDeleteEdgeMode);
+  };
+
+  /**
+   * Bật/tắt chế độ sửa độ dài đường ray
+   */
+  const toggleEditEdgeMode = () => {
+    setIsAddEdgeMode(false);
+    setSelectedNodeForEdge(null);
+    setIsDeleteNodeMode(false);
+    setIsDeleteEdgeMode(false);
+    setIsMarkRequiredMode(false);
+    setIsEditEdgeMode(!isEditEdgeMode);
+  };
+
+  /**
+   * Bật/tắt chế độ đánh dấu đường ray bắt buộc
+   */
+  const toggleMarkRequiredMode = () => {
+    setIsAddEdgeMode(false);
+    setSelectedNodeForEdge(null);
+    setIsDeleteNodeMode(false);
+    setIsDeleteEdgeMode(false);
+    setIsEditEdgeMode(false);
+    setIsMarkRequiredMode(!isMarkRequiredMode);
+  };
+
+  /**
+   * Xử lý click vào node khi ở chế độ thêm edge
+   */
+  const handleNodeClickForEdge = (nodeId) => {
+    if (!isAddEdgeMode) return;
+
+    if (selectedNodeForEdge === null) {
+      // Chọn node đầu tiên
+      setSelectedNodeForEdge(nodeId);
+    } else {
+      // Chọn node thứ hai, tạo edge
+      if (selectedNodeForEdge !== nodeId) {
+        addEdge(selectedNodeForEdge, nodeId);
+      }
+      // Reset để tiếp tục thêm edge khác (không tắt mode)
+      setSelectedNodeForEdge(null);
+    }
+  };
+
   const value = {
     nodes,
     edges,
@@ -225,6 +353,12 @@ export const GraphProvider = ({ children }) => {
     algorithm,
     distanceScale,
     backgroundImage,
+    isAddEdgeMode,
+    selectedNodeForEdge,
+    isDeleteNodeMode,
+    isDeleteEdgeMode,
+    isEditEdgeMode,
+    isMarkRequiredMode,
     setNodes,
     setEdges,
     setMstEdges,
@@ -243,7 +377,15 @@ export const GraphProvider = ({ children }) => {
     clearGraph,
     loadSampleGraph,
     updateNodePosition,
-    rearrangeNodes
+    rearrangeNodes,
+    toggleAddEdgeMode,
+    handleNodeClickForEdge,
+    toggleDeleteNodeMode,
+    toggleDeleteEdgeMode,
+    toggleEditEdgeMode,
+    toggleMarkRequiredMode,
+    updateEdgeWeight,
+    toggleEdgeRequired
   };
 
   return (

@@ -9,9 +9,7 @@ import './InfoPanel.css';
  * InfoPanel component - Hiển thị thông tin về đồ thị
  */
 const InfoPanel = () => {
-  const { nodes, edges = [], mstEdges, totalCost, animationTime } = useGraph();
-
-  const maxEdges = nodes.length > 0 ? (nodes.length * (nodes.length - 1)) / 2 : 0;
+  const { nodes, edges = [], totalCost, animationTime } = useGraph();
 
   return (
     <div className="info-panel">
@@ -22,18 +20,13 @@ const InfoPanel = () => {
       >
         <div className="info-panel__stats">
           <div className="info-panel__stat">
-            <span className="info-panel__stat-label">Số đỉnh:</span>
+            <span className="info-panel__stat-label">Số trạm:</span>
             <span className="info-panel__stat-value">{nodes.length}</span>
           </div>
 
           <div className="info-panel__stat">
-            <span className="info-panel__stat-label">Số cạnh:</span>
-            <span className="info-panel__stat-value">{edges.length} / {maxEdges}</span>
-          </div>
-
-          <div className="info-panel__stat">
-            <span className="info-panel__stat-label">Cạnh MST:</span>
-            <span className="info-panel__stat-value success">{mstEdges.length}</span>
+            <span className="info-panel__stat-label">Số đường ray:</span>
+            <span className="info-panel__stat-value">{edges.length}</span>
           </div>
 
           {animationTime > 0 && (
@@ -56,28 +49,6 @@ const InfoPanel = () => {
           )}
         </div>
       </Card>
-
-      {mstEdges.length > 0 && (
-        <Card
-          title="Cạnh MST"
-          variant="success"
-          collapsible
-          defaultOpen
-        >
-          <div className="info-panel__edges">
-            {mstEdges.map((edge, idx) => (
-              <div key={idx} className="info-panel__edge">
-                <span className="info-panel__edge-label">
-                  {edge.from} → {edge.to}
-                </span>
-                <span className="info-panel__edge-weight">
-                  {pixelsToKm(edge.weight)} km
-                </span>
-              </div>
-            ))}
-          </div>
-        </Card>
-      )}
     </div>
   );
 };

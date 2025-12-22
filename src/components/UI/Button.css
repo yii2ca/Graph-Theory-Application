@@ -1,4 +1,4 @@
-/* Button Component Styles */
+/* Button Component Styles - Blueprint Railway Theme */
 
 .btn {
   display: inline-flex;
@@ -6,15 +6,17 @@
   justify-content: center;
   font-family: var(--font-family-sans);
   font-weight: var(--font-weight-semibold);
-  border: none;
+  border: 1px solid transparent;
   cursor: pointer;
-  border-radius: var(--radius-lg);
+  border-radius: var(--radius-md);
   transition: all var(--transition-base);
   position: relative;
   overflow: hidden;
   white-space: nowrap;
   user-select: none;
   gap: var(--spacing-2);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
 }
 
 /* Button Content */
@@ -27,48 +29,49 @@
 }
 
 .btn__icon {
-  width: 16px;
-  height: 16px;
+  width: 14px;
+  height: 14px;
   flex-shrink: 0;
 }
 
 .btn__text {
-  font-size: var(--font-size-base);
+  font-size: var(--font-size-sm);
   line-height: var(--line-height-tight);
 }
 
 /* === SIZES === */
 .btn--sm {
-  padding: 8px 12px;
-  min-height: var(--size-button-sm);
-  font-size: var(--font-size-sm);
+  padding: 6px 10px;
+  min-height: 28px;
+  font-size: var(--font-size-xs);
 }
 
 .btn--md {
-  padding: 10px 16px;
-  min-height: var(--size-button-md);
-  font-size: var(--font-size-base);
+  padding: 8px 14px;
+  min-height: 34px;
+  font-size: var(--font-size-sm);
 }
 
 .btn--lg {
-  padding: 12px 24px;
-  min-height: var(--size-button-lg);
-  font-size: var(--font-size-lg);
+  padding: 10px 20px;
+  min-height: 40px;
+  font-size: var(--font-size-base);
 }
 
 /* === VARIANTS === */
 
 /* Primary Button */
 .btn--primary {
-  background-color: var(--color-primary);
-  color: var(--color-text-primary);
-  box-shadow: var(--shadow-md);
+  background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-dark) 100%);
+  color: var(--color-bg-primary);
+  border-color: var(--color-primary);
+  box-shadow: none;
 }
 
 .btn--primary:hover:not(:disabled) {
-  background-color: var(--color-primary-dark);
-  box-shadow: var(--shadow-lg);
-  transform: translateY(-2px);
+  background: linear-gradient(135deg, var(--color-primary-light) 0%, var(--color-primary) 100%);
+  box-shadow: 0 2px 8px rgba(0, 212, 255, 0.2);
+  transform: translateY(-1px);
 }
 
 .btn--primary:active:not(:disabled) {
@@ -77,54 +80,56 @@
 
 /* Secondary Button */
 .btn--secondary {
-  background-color: var(--color-bg-secondary);
+  background-color: var(--color-bg-card);
   color: var(--color-text-secondary);
-  border: 1px solid var(--color-border-light);
+  border-color: var(--color-border);
 }
 
 .btn--secondary:hover:not(:disabled) {
-  background-color: var(--color-bg-tertiary);
-  border-color: var(--color-primary-light);
-  color: var(--color-primary-light);
+  background-color: var(--color-bg-hover);
+  border-color: var(--color-primary);
+  color: var(--color-primary);
 }
 
 /* Success Button */
 .btn--success {
-  background-color: var(--color-success);
-  color: var(--color-text-primary);
-  box-shadow: var(--shadow-md);
+  background: linear-gradient(135deg, var(--color-success) 0%, #22a55a 100%);
+  color: var(--color-bg-primary);
+  border-color: var(--color-success);
+  box-shadow: none;
 }
 
 .btn--success:hover:not(:disabled) {
-  background-color: var(--color-success-light);
-  box-shadow: var(--shadow-lg);
-  transform: translateY(-2px);
+  background: linear-gradient(135deg, var(--color-success-light) 0%, var(--color-success) 100%);
+  box-shadow: 0 2px 8px rgba(46, 213, 115, 0.2);
+  transform: translateY(-1px);
 }
 
 /* Danger Button */
 .btn--danger {
-  background-color: var(--color-danger);
-  color: var(--color-text-primary);
-  box-shadow: var(--shadow-md);
+  background: linear-gradient(135deg, var(--color-danger) 0%, #cc3a47 100%);
+  color: #ffffff;
+  border-color: var(--color-danger);
+  box-shadow: none;
 }
 
 .btn--danger:hover:not(:disabled) {
-  background-color: #dc2626;
-  box-shadow: var(--shadow-lg);
-  transform: translateY(-2px);
+  background: linear-gradient(135deg, var(--color-danger-light) 0%, var(--color-danger) 100%);
+  box-shadow: 0 2px 8px rgba(255, 71, 87, 0.2);
+  transform: translateY(-1px);
 }
 
 /* Ghost Button (Transparent) */
 .btn--ghost {
   background-color: transparent;
   color: var(--color-text-secondary);
-  border: 1px solid transparent;
+  border-color: var(--color-border);
 }
 
 .btn--ghost:hover:not(:disabled) {
-  background-color: rgba(139, 92, 246, 0.1);
-  border-color: var(--color-primary-light);
-  color: var(--color-primary-light);
+  background-color: var(--color-bg-hover);
+  border-color: var(--color-primary);
+  color: var(--color-primary);
 }
 
 /* === STATES === */

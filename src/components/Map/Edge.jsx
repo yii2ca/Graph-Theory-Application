@@ -3,13 +3,14 @@ import { getMidPoint, pixelsToKm } from '../../utils/calculations';
 
 /**
  * Edge component - Đại diện cho một cạnh trong đồ thị
- * Hỗ trợ điểm điều khiển để làm cong đường
+ * Phong cách: Blueprint Railway Lines với màu sắc đa dạng
  */
 const Edge = ({ 
   from, 
   to, 
   isMst, 
-  isDefault, 
+  isDefault,
+  isRequired,
   controlPoint,
   onControlPointDrag,
   edgeId,
@@ -31,10 +32,18 @@ const Edge = ({
     y: 0.25 * from.y + 0.5 * ctrlPoint.y + 0.25 * to.y
   } : midPoint;
   
+  // Railway Line Colors - đa dạng màu sắc như bản đồ metro
+  const lineColors = ['#ff4757', '#ffa502', '#00d4ff', '#ff7f50', '#3742fa', '#2ed573'];
+  // edgeId có thể là string "0-1", lấy số đầu tiên hoặc dùng index 0
+  const edgeIndex = typeof edgeId === 'number' ? edgeId : (typeof edgeId === 'string' ? parseInt(edgeId.split('-')[0], 10) : 0);
+  const baseLineColor = lineColors[edgeIndex % lineColors.length] || '#00d4ff';
+  
   // Màu và độ dày
-  const strokeColor = isMst ? '#10b981' : isDefault ? '#374151' : '#6b7280';
-  const strokeWidth = isMst ? 4 : isDefault ? 1 : 2;
-  const opacity = isMst ? 1 : isDefault ? 0.2 : 0.7;
+  // Ưu tiên: MST (xanh lá) > Required (vàng cam) > Normal (xanh cyan)
+  const strokeColor = isMst ? '#2ed573' : (isRequired ? '#ffa502' : '#00d4ff');
+  const strokeWidth = isMst ? 5 : (isRequired ? 4 : 3);
+  const opacity = isMst ? 1 : (isRequired ? 0.9 : 0.8);
+  const glowColor = isMst ? 'rgba(46, 213, 115, 0.6)' : (isRequired ? 'rgba(255, 165, 2, 0.5)' : 'rgba(0, 212, 255, 0.4)');
 
   // Tính khoảng cách in km
   const distanceKm = weight ? pixelsToKm(weight, distanceScale) : null;
@@ -57,7 +66,6 @@ const Edge = ({
     const handleMouseMove = (moveEvent) => {
       if (onControlPointDrag) {
         const rect = svg.getBoundingClientRect();
-        // Lấy transform từ group (zoom và pan)
         const transform = g.style.transform || '';
         const scaleMatch = transform.match(/scale\(([\d.]+)\)/);
         const translateMatch = transform.match(/translate\(([-\d.]+)px,\s*([-\d.]+)px\)/);
@@ -66,7 +74,6 @@ const Edge = ({
         const translateX = translateMatch ? parseFloat(translateMatch[1]) : 0;
         const translateY = translateMatch ? parseFloat(translateMatch[2]) : 0;
         
-        // Tính toạ độ đã transform
         const x = (moveEvent.clientX - rect.left - translateX) / scale;
         const y = (moveEvent.clientY - rect.top - translateY) / scale;
         
@@ -113,6 +120,31 @@ const Edge = ({
         />
       )}
 
+      {/* Glow effect cho MST edges */}
+      {isMst && (
+        hasCurve ? (
+          <path
+            d={`M ${from.x} ${from.y} Q ${ctrlPoint.x} ${ctrlPoint.y} ${to.x} ${to.y}`}
+            stroke={glowColor}
+            strokeWidth={strokeWidth + 6}
+            fill="none"
+            opacity={0.5}
+            style={{ filter: 'blur(4px)' }}
+          />
+        ) : (
+          <line
+            x1={from.x}
+            y1={from.y}
+            x2={to.x}
+            y2={to.y}
+            stroke={glowColor}
+            strokeWidth={strokeWidth + 6}
+            opacity={0.5}
+            style={{ filter: 'blur(4px)' }}
+          />
+        )
+      )}
+
       {/* Cạnh chính */}
       {hasCurve ? (
         <path
@@ -121,9 +153,10 @@ const Edge = ({
           strokeWidth={strokeWidth}
           fill="none"
           opacity={opacity}
+          strokeLinecap="round"
           className="transition-all duration-150"
           style={{
-            filter: isMst ? 'drop-shadow(0 0 6px rgba(16, 185, 129, 0.6))' : 'none',
+            filter: isMst ? `drop-shadow(0 0 8px ${glowColor})` : 'none',
             animation: isMst ? `drawLine 0.5s ease-out ${animationDelay}ms both` : 'none'
           }}
         />
@@ -136,45 +169,47 @@ const Edge = ({
           stroke={strokeColor}
           strokeWidth={strokeWidth}
           opacity={opacity}
+          strokeLinecap="round"
           className="transition-all duration-150"
           style={{
-            filter: isMst ? 'drop-shadow(0 0 6px rgba(16, 185, 129, 0.6))' : 'none',
+            filter: isMst ? `drop-shadow(0 0 8px ${glowColor})` : 'none',
             animation: isMst ? `drawLine 0.5s ease-out ${animationDelay}ms both` : 'none'
           }}
         />
       )}
 
-      {/* Điểm điều khiển - hiện khi hover hoặc đang kéo - LUÔN nằm trên đường cong */}
+      {/* Điểm điều khiển - hiện khi hover hoặc đang kéo */}
       {!isMst && onControlPointDrag && (isHovered || isDraggingControl) && (
         <circle
           cx={curveMiddle.x}
           cy={curveMiddle.y}
           r={isDraggingControl ? 10 : 6}
-          fill={isDraggingControl ? '#8b5cf6' : '#ffffff'}
-          stroke="#8b5cf6"
+          fill={isDraggingControl ? '#00d4ff' : '#ffffff'}
+          stroke="#00d4ff"
           strokeWidth="2"
           style={{ 
             cursor: 'grab',
-            filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.3))'
+            filter: 'drop-shadow(0 0 8px rgba(0, 212, 255, 0.6))'
           }}
           onMouseDown={handleControlMouseDown}
         />
       )}
 
-      {/* Hiển thị khoảng cách chỉ khi hover */}
+      {/* Hiển thị khoảng cách khi hover */}
       {distanceKm && isHovered && (
         <g>
           {/* Background cho text */}
           <rect
-            x={labelPoint.x - 32}
-            y={labelPoint.y - 30}
-            width="64"
-            height="26"
-            fill={isMst ? '#0f172a' : '#1e293b'}
-            rx="6"
-            opacity="0.95"
+            x={labelPoint.x - 30}
+            y={labelPoint.y - 28}
+            width="60"
+            height="22"
+            fill="rgba(10, 22, 40, 0.95)"
+            rx="4"
+            stroke={isMst ? '#2ed573' : '#00d4ff'}
+            strokeWidth="1"
             style={{
-              filter: 'drop-shadow(0 2px 8px rgba(0,0,0,0.3))'
+              filter: 'drop-shadow(0 4px 12px rgba(0,0,0,0.4))'
             }}
           />
           
@@ -184,9 +219,10 @@ const Edge = ({
             y={labelPoint.y - 17}
             textAnchor="middle"
             dominantBaseline="central"
-            fill={isMst ? '#10b981' : '#ffffff'}
-            fontSize="12"
-            fontWeight="600"
+            fill={isMst ? '#2ed573' : '#00d4ff'}
+            fontSize="11"
+            fontWeight="700"
+            fontFamily="monospace"
             className="pointer-events-none select-none"
           >
             {distanceKm} km

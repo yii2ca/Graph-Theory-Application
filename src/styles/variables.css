@@ -1,48 +1,69 @@
 /**
  * CSS Variables cho toàn bộ ứng dụng
- * Design System: Railway Network Optimization
+ * Design System: Blueprint Railway Network
+ * Phong cách: Technical Blueprint với Dark Theme
  */
 
 :root {
-  /* === COLORS === */
-  /* Primary Colors - Xanh dương tươi */
-  --color-primary: #0084ff;
-  --color-primary-light: #4da6ff;
-  --color-primary-lighter: #99ccff;
-  --color-primary-dark: #0066cc;
-  --color-primary-darker: #003d99;
+  /* === COLORS - BLUEPRINT THEME === */
+  /* Primary Colors - Xanh Blueprint đậm */
+  --color-primary: #00d4ff;
+  --color-primary-light: #4de5ff;
+  --color-primary-lighter: #80edff;
+  --color-primary-dark: #00a8cc;
+  --color-primary-darker: #007a99;
   
-  /* Secondary Colors - Xanh lá cây */
-  --color-secondary: #00b84d;
-  --color-secondary-light: #33cc66;
-  --color-secondary-lighter: #99e6b3;
-  --color-secondary-dark: #008033;
+  /* Secondary Colors - Cam/Vàng highlight */
+  --color-secondary: #ffb800;
+  --color-secondary-light: #ffc933;
+  --color-secondary-lighter: #ffd966;
+  --color-secondary-dark: #cc9300;
+  
+  /* Railway Line Colors */
+  --color-line-red: #ff4757;
+  --color-line-yellow: #ffa502;
+  --color-line-blue: #3742fa;
+  --color-line-green: #2ed573;
+  --color-line-cyan: #00d4ff;
+  --color-line-orange: #ff7f50;
   
   /* Status Colors */
-  --color-success: #1abc9c;
-  --color-success-light: #48dbcc;
-  --color-danger: #e74c3c;
-  --color-danger-light: #ec7063;
-  --color-warning: #f39c12;
-  --color-info: #3498db;
+  --color-success: #2ed573;
+  --color-success-light: #7bed9f;
+  --color-danger: #ff4757;
+  --color-danger-light: #ff6b81;
+  --color-warning: #ffa502;
+  --color-info: #00d4ff;
   
-  /* Background Colors - Nền sáng hơn */
-  --color-bg-primary: #1a1a2e;
-  --color-bg-secondary: #16213e;
-  --color-bg-tertiary: #0f3460;
-  --color-bg-light: #f5f7fa;
-  --color-bg-lighter: #ffffff;
+  /* Background Colors - Blueprint Dark */
+  --color-bg-primary: #0a1628;
+  --color-bg-secondary: #0d1f3c;
+  --color-bg-tertiary: #132744;
+  --color-bg-panel: rgba(13, 31, 60, 0.95);
+  --color-bg-card: rgba(19, 39, 68, 0.9);
+  --color-bg-hover: rgba(0, 212, 255, 0.1);
+  
+  /* Blueprint Grid Colors */
+  --color-grid-major: rgba(0, 212, 255, 0.15);
+  --color-grid-minor: rgba(0, 212, 255, 0.05);
   
   /* Text Colors */
-  --color-text-primary: #ecf0f1;
-  --color-text-secondary: #bdc3c7;
-  --color-text-tertiary: #95a5a6;
-  --color-text-muted: #7f8c8d;
-  --color-text-dark: #2c3e50;
+  --color-text-primary: #ffffff;
+  --color-text-secondary: #a0c4ff;
+  --color-text-tertiary: #6b8cae;
+  --color-text-muted: #4a6785;
+  --color-text-accent: #00d4ff;
   
   /* Border Colors */
-  --color-border: #34495e;
-  --color-border-light: #7f8c8d;
+  --color-border: rgba(0, 212, 255, 0.3);
+  --color-border-light: rgba(0, 212, 255, 0.15);
+  --color-border-active: #00d4ff;
+  
+  /* Glow Effects - Minimal */
+  --glow-primary: 0 0 8px rgba(0, 212, 255, 0.2);
+  --glow-success: 0 0 8px rgba(46, 213, 115, 0.2);
+  --glow-warning: 0 0 8px rgba(255, 165, 2, 0.2);
+  --glow-danger: 0 0 8px rgba(255, 71, 87, 0.2);
   
   /* === TYPOGRAPHY === */
   --font-family-sans: 'Inter', 'Segoe UI', 'Roboto', -apple-system, BlinkMacSystemFont, 'Helvetica Neue', sans-serif;
@@ -98,7 +119,7 @@
   --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
   --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
   --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
-  --shadow-glow: 0 0 20px rgba(0, 132, 255, 0.4);
+  --shadow-glow: 0 0 8px rgba(0, 132, 255, 0.15);
   
   /* === TRANSITIONS === */
   --transition-fast: 150ms ease-out;
