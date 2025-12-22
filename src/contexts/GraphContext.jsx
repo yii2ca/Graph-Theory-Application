@@ -112,13 +112,19 @@ export const GraphProvider = ({ children }) => {
    * @param {number} newWeight - Trọng số mới
    */
   const updateEdgeWeight = (fromId, toId, newWeight) => {
-    setEdges(edges.map(edge => {
-      if ((edge.from === fromId && edge.to === toId) || 
-          (edge.from === toId && edge.to === fromId)) {
-        return { ...edge, weight: newWeight };
-      }
-      return edge;
-    }));
+    console.log('updateEdgeWeight called with:', fromId, toId, newWeight);
+    setEdges(prevEdges => {
+      const updatedEdges = prevEdges.map(edge => {
+        if ((edge.from === fromId && edge.to === toId) || 
+            (edge.from === toId && edge.to === fromId)) {
+          console.log('Found edge to update:', edge);
+          return { ...edge, weight: newWeight };
+        }
+        return edge;
+      });
+      console.log('Updated edges:', updatedEdges);
+      return updatedEdges;
+    });
   };
 
   /**

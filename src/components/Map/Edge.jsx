@@ -195,22 +195,19 @@ const Edge = ({
         />
       )}
 
-      {/* Hiển thị khoảng cách khi hover */}
-      {distanceKm && isHovered && (
+      {/* Hiển thị khoảng cách - luôn hiển thị */}
+      {distanceKm && (
         <g>
           {/* Background cho text */}
           <rect
-            x={labelPoint.x - 30}
-            y={labelPoint.y - 28}
-            width="60"
-            height="22"
-            fill="rgba(10, 22, 40, 0.95)"
-            rx="4"
-            stroke={isMst ? '#2ed573' : '#00d4ff'}
+            x={labelPoint.x - 28}
+            y={labelPoint.y - 26}
+            width="56"
+            height="18"
+            fill="rgba(10, 22, 40, 0.85)"
+            rx="3"
+            stroke={isMst ? '#2ed573' : (isRequired ? '#ffa502' : '#00d4ff')}
             strokeWidth="1"
-            style={{
-              filter: 'drop-shadow(0 4px 12px rgba(0,0,0,0.4))'
-            }}
           />
           
           {/* Text khoảng cách */}
@@ -219,8 +216,8 @@ const Edge = ({
             y={labelPoint.y - 17}
             textAnchor="middle"
             dominantBaseline="central"
-            fill={isMst ? '#2ed573' : '#00d4ff'}
-            fontSize="11"
+            fill={isMst ? '#2ed573' : (isRequired ? '#ffa502' : '#00d4ff')}
+            fontSize="10"
             fontWeight="700"
             fontFamily="monospace"
             className="pointer-events-none select-none"
