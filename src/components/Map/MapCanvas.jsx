@@ -21,7 +21,10 @@ const MapCanvas = forwardRef((props, ref) => {
     isDeleteEdgeMode,
     isEditEdgeMode,
     isMarkRequiredMode,
-    handleNodeClickForEdge, 
+    primStartNode,
+    isSelectStartNodeMode,
+    handleNodeClickForEdge,
+    handleNodeClickForStartNode,
     addNode, 
     updateNodePosition, 
     removeNode, 
@@ -371,6 +374,12 @@ const MapCanvas = forwardRef((props, ref) => {
       return;
     }
 
+    // Nếu đang ở chế độ chọn đỉnh khởi đầu và click vào node
+    if (isSelectStartNodeMode && clickedNode) {
+      handleNodeClickForStartNode(clickedNode.id);
+      return;
+    }
+
     // Nếu đang ở chế độ xóa trạm và click vào node
     if (isDeleteNodeMode && clickedNode) {
       removeNode(clickedNode.id);
@@ -603,6 +612,7 @@ const MapCanvas = forwardRef((props, ref) => {
               isHovered={hoveredNode === node.id}
               isMstNode={mstEdges.some(e => e.from === node.id || e.to === node.id)}
               isDragging={draggedNode === node.id}
+              isStartNode={primStartNode === node.id}
             />
           ))}
         </g>

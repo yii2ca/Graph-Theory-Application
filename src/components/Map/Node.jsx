@@ -4,7 +4,7 @@ import React, { useState } from 'react';
  * Node component - Đại diện cho một đỉnh trong đồ thị (kiểu Railway Station)
  * Phong cách: Blueprint Railway Map
  */
-const Node = ({ node, isHovered, isMstNode, isDragging }) => {
+const Node = ({ node, isHovered, isMstNode, isDragging, isStartNode }) => {
   const [showTooltip, setShowTooltip] = useState(false);
   
   // Kích thước node
@@ -12,9 +12,9 @@ const Node = ({ node, isHovered, isMstNode, isDragging }) => {
   const innerRadius = isHovered || isDragging ? 8 : 6;
   
   // Màu sắc Railway Theme
-  const outerColor = isMstNode ? '#2ed573' : '#00d4ff';
-  const innerColor = isMstNode ? '#7bed9f' : '#ffffff';
-  const glowColor = isMstNode ? 'rgba(46, 213, 115, 0.6)' : 'rgba(0, 212, 255, 0.5)';
+  const outerColor = isStartNode ? '#ffa502' : isMstNode ? '#2ed573' : '#00d4ff';
+  const innerColor = isStartNode ? '#ffc048' : isMstNode ? '#7bed9f' : '#ffffff';
+  const glowColor = isStartNode ? 'rgba(255, 165, 2, 0.6)' : isMstNode ? 'rgba(46, 213, 115, 0.6)' : 'rgba(0, 212, 255, 0.5)';
 
   return (
     <g 

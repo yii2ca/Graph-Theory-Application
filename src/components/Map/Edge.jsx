@@ -225,7 +225,7 @@ const Edge = ({
             fontFamily="monospace"
             className="pointer-events-none select-none"
           >
-            {distanceKm} km
+            {typeof distanceKm === 'number' ? distanceKm.toFixed(2) : distanceKm} km
           </text>
         </g>
       )}
