@@ -16,6 +16,7 @@ const MapCanvas = forwardRef((props, ref) => {
     mstEdges, 
     distanceScale, 
     backgroundImage, 
+    isAddNodeMode,
     isAddEdgeMode, 
     isDeleteNodeMode,
     isDeleteEdgeMode,
@@ -390,8 +391,27 @@ const MapCanvas = forwardRef((props, ref) => {
       return;
     }
 
-    // Nếu không click vào node nào, kiểm tra và thêm node mới
-    if (!clickedNode) {
+    // Nếu không click vào node nào và đang ở chế độ thêm trạm, thêm node mới
+    if (isAddNodeMode && !clickedNode) {
+      const NODE_RADIUS = 20;
+      // Khoảng cách tối thiểu giữa 2 tâm = 2.5 * bán kính
+      const minDistance = NODE_RADIUS * 2.5;
+      
+      // Kiểm tra khoảng cách từ tâm điểm mới đến tâm các điểm hiện có
+      const isTooClose = nodes.some(node => {
+        const distance = Math.sqrt((node.x - x) ** 2 + (node.y - y) ** 2);
+        return distance < minDistance;
+      });
+
+      // Chỉ thêm nếu không quá gần các điểm khác
+      if (!isTooClose) {
+        addNode(x, y);
+      }
+      return;
+    }
+
+    // Nếu không ở bất kỳ chế độ đặc biệt nào và không click vào node, thêm node mới (chế độ mặc định)
+    if (!isAddNodeMode && !isAddEdgeMode && !isDeleteNodeMode && !clickedNode) {
       const NODE_RADIUS = 20;
       // Khoảng cách tối thiểu giữa 2 tâm = 2.5 * bán kính
       const minDistance = NODE_RADIUS * 2.5;
@@ -789,9 +809,17 @@ const MapCanvas = forwardRef((props, ref) => {
                   fontSize: '14px',
                   outline: 'none',
                   boxSizing: 'border-box',
+                  MozAppearance: 'textfield',
                 }}
                 autoFocus
               />
+              <style>{`
+                input[type="number"]::-webkit-inner-spin-button,
+                input[type="number"]::-webkit-outer-spin-button {
+                  -webkit-appearance: none;
+                  margin: 0;
+                }
+              `}</style>
               {weightError && (
                 <p style={{
                   color: '#ff4757',

@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState } from 'react';
+import { isSelfLoop, isDuplicateEdge } from '../algorithms/graphUtils';
 
 /**
  * Context để quản lý state toàn cục của đồ thị
@@ -30,6 +31,9 @@ export const GraphProvider = ({ children }) => {
   // State cho tổng chi phí
   const [totalCost, setTotalCost] = useState(0);
   
+  // State cho animation time
+  const [animationTime, setAnimationTime] = useState(0);
+  
   // State cho menu
   const [isMenuOpen, setIsMenuOpen] = useState(true);
   
@@ -48,6 +52,7 @@ export const GraphProvider = ({ children }) => {
   const [selectedNodeForEdge, setSelectedNodeForEdge] = useState(null);
 
   // State cho các chế độ thao tác khác
+  const [isAddNodeMode, setIsAddNodeMode] = useState(false);
   const [isDeleteNodeMode, setIsDeleteNodeMode] = useState(false);
   const [isDeleteEdgeMode, setIsDeleteEdgeMode] = useState(false);
   const [isEditEdgeMode, setIsEditEdgeMode] = useState(false);
@@ -60,12 +65,109 @@ export const GraphProvider = ({ children }) => {
   const [primStartNode, setPrimStartNode] = useState(null);
   const [isSelectStartNodeMode, setIsSelectStartNodeMode] = useState(false);
 
+  // State cho Toast notifications
+  const [toasts, setToasts] = useState([]);
+
+  // State cho Undo/Redo functionality
+  const [history, setHistory] = useState([]);
+  const [historyIndex, setHistoryIndex] = useState(-1);
+  const maxHistorySize = 50; // Giới hạn lịch sử để tránh tốn bộ nhớ
+
+  /**
+   * Hiển thị toast notification
+   * @param {string} message - Nội dung thông báo
+   * @param {string} type - Loại: success, error, warning, info
+   */
+  const showToast = (message, type = 'info') => {
+    const id = Date.now();
+    setToasts(prev => [...prev, { id, message, type }]);
+  };
+
+  /**
+   * Xóa toast notification
+   * @param {number} id - ID của toast cần xóa
+   */
+  const removeToast = (id) => {
+    setToasts(prev => prev.filter(toast => toast.id !== id));
+  };
+
+  /**
+   * Lưu trạng thái hiện tại vào history
+   */
+  const saveToHistory = () => {
+    const currentState = {
+      nodes: JSON.parse(JSON.stringify(nodes)),
+      edges: JSON.parse(JSON.stringify(edges))
+    };
+
+    // Xóa các state sau historyIndex hiện tại (khi undo rồi thực hiện hành động mới)
+    const newHistory = history.slice(0, historyIndex + 1);
+    newHistory.push(currentState);
+
+    // Giới hạn kích thước history
+    if (newHistory.length > maxHistorySize) {
+      newHistory.shift();
+      setHistory(newHistory);
+      setHistoryIndex(newHistory.length - 1);
+    } else {
+      setHistory(newHistory);
+      setHistoryIndex(newHistory.length - 1);
+    }
+  };
+
+  /**
+   * Hoàn tác (Undo)
+   */
+  const undo = () => {
+    if (historyIndex <= 0) {
+      showToast('Không còn thao tác để hoàn tác', 'info');
+      return;
+    }
+
+    const newIndex = historyIndex - 1;
+    const previousState = history[newIndex];
+    
+    setNodes(JSON.parse(JSON.stringify(previousState.nodes)));
+    setEdges(JSON.parse(JSON.stringify(previousState.edges)));
+    setHistoryIndex(newIndex);
+    
+    showToast('Đã hoàn tác', 'success');
+  };
+
+  /**
+   * Làm lại (Redo)
+   */
+  const redo = () => {
+    if (historyIndex >= history.length - 1) {
+      showToast('Không còn thao tác để làm lại', 'info');
+      return;
+    }
+
+    const newIndex = historyIndex + 1;
+    const nextState = history[newIndex];
+    
+    setNodes(JSON.parse(JSON.stringify(nextState.nodes)));
+    setEdges(JSON.parse(JSON.stringify(nextState.edges)));
+    setHistoryIndex(newIndex);
+    
+    showToast('Đã làm lại', 'success');
+  };
+
   /**
    * Thêm node mới vào đồ thị
    * @param {number} x - Tọa độ x
    * @param {number} y - Tọa độ y
+   * @param {string} label - Tên trạm (optional)
    */
-  const addNode = (x, y) => {
+  const addNode = (x, y, label = null) => {
+    const MAX_NODES = 50;
+    
+    // Kiểm tra giới hạn số lượng node
+    if (nodes.length >= MAX_NODES) {
+      showToast(`Đã đạt giới hạn tối đa ${MAX_NODES} trạm!`, 'error');
+      return false;
+    }
+    
     const NODE_RADIUS = 20;
     // Khoảng cách tối thiểu giữa 2 tâm = 2.5 * bán kính
     const minDistance = NODE_RADIUS * 2.5;
@@ -80,18 +182,95 @@ export const GraphProvider = ({ children }) => {
 
     if (isTooClose) {
       console.warn('Không thể thêm điểm quá gần các điểm khác (khoảng cách < ' + minDistance + 'px)');
-      return;
+      return false;
     }
 
     const newNode = {
       id: nodes.length,
       x,
       y,
-      label: `Trạm ${nodes.length + 1}`
+      label: label || `Trạm ${nodes.length + 1}`
     };
     
     // Không tự động tạo cạnh - người dùng sẽ tự kéo đường nối
     setNodes([...nodes, newNode]);
+    saveToHistory(); // Lưu vào history sau khi thêm node
+    return true;
+  };
+
+  /**
+   * Thêm nhiều node cùng lúc với vị trí ngẫu nhiên
+   * @param {number} count - Số lượng node cần thêm
+   * @param {Array} names - Mảng tên cho các node (optional)
+   */
+  const addMultipleNodes = (count, names = null) => {
+    const MAX_NODES = 50;
+    
+    // Kiểm tra giới hạn tổng số node
+    if (nodes.length >= MAX_NODES) {
+      showToast(`Đã đạt giới hạn tối đa ${MAX_NODES} trạm!`, 'error');
+      return 0;
+    }
+    
+    // Giới hạn số lượng có thể thêm
+    const maxCanAdd = MAX_NODES - nodes.length;
+    if (count > maxCanAdd) {
+      showToast(`Chỉ có thể thêm thêm ${maxCanAdd} trạm nữa (đang có ${nodes.length}/${MAX_NODES})`, 'warning');
+      count = maxCanAdd;
+    }
+    
+    const newNodes = [];
+    const NODE_RADIUS = 20;
+    const minDistance = NODE_RADIUS * 2.5;
+    
+    // Vùng canvas để tạo nodes (tránh quá sát biên)
+    const minX = 100;
+    const maxX = 1000;
+    const minY = 100;
+    const maxY = 600;
+    
+    let attempts = 0;
+    const maxAttempts = count * 100; // Giới hạn số lần thử
+
+    for (let i = 0; i < count && attempts < maxAttempts; attempts++) {
+      // Tạo vị trí ngẫu nhiên
+      const x = Math.floor(Math.random() * (maxX - minX) + minX);
+      const y = Math.floor(Math.random() * (maxY - minY) + minY);
+      
+      // Kiểm tra khoảng cách với nodes hiện có và nodes mới
+      const allNodes = [...nodes, ...newNodes];
+      const isTooClose = allNodes.some(node => {
+        const dx = node.x - x;
+        const dy = node.y - y;
+        const distance = Math.sqrt(dx * dx + dy * dy);
+        return distance < minDistance;
+      });
+
+      if (!isTooClose) {
+        const nodeId = nodes.length + newNodes.length;
+        const label = names && names[newNodes.length] ? names[newNodes.length] : `Trạm ${nodeId + 1}`;
+        
+        newNodes.push({
+          id: nodeId,
+          x,
+          y,
+          label
+        });
+        
+        // Đã thêm đủ số lượng
+        if (newNodes.length >= count) break;
+      }
+    }
+
+    if (newNodes.length < count) {
+      showToast(`Chỉ có thể thêm ${newNodes.length}/${count} trạm do không đủ không gian`, 'warning');
+    } else {
+      showToast(`Đã thêm ${newNodes.length} trạm mới`, 'success');
+    }
+
+    setNodes([...nodes, ...newNodes]);
+    saveToHistory(); // Lưu vào history sau khi thêm nhiều node
+    return newNodes.length;
   };
 
   /**
@@ -103,6 +282,7 @@ export const GraphProvider = ({ children }) => {
     // Cũng xóa tất cả edges liên quan đến node này
     setEdges(edges.filter(e => e.from !== nodeId && e.to !== nodeId));
     setMstEdges(mstEdges.filter(e => e.from !== nodeId && e.to !== nodeId));
+    saveToHistory(); // Lưu vào history sau khi xóa node
   };
 
   /**
@@ -161,6 +341,7 @@ export const GraphProvider = ({ children }) => {
     setMstEdges(mstEdges.filter(e => 
       !((e.from === fromId && e.to === toId) || (e.from === toId && e.to === fromId))
     ));
+    saveToHistory(); // Lưu vào history sau khi xóa cạnh
   };
 
   /**
@@ -169,15 +350,31 @@ export const GraphProvider = ({ children }) => {
    * @param {number} toId - ID của đỉnh đích
    */
   const addEdge = (fromId, toId) => {
-    // Kiểm tra cạnh đã tồn tại chưa
-    const edgeExists = edges.some(e => 
-      (e.from === fromId && e.to === toId) || (e.from === toId && e.to === fromId)
-    );
-    
-    if (!edgeExists && fromId !== toId) {
-      const edgeId = `${fromId}-${toId}`;
-      setEdges([...edges, { from: fromId, to: toId, id: edgeId, controlPoint: null }]);
+    // Kiểm tra self-loop
+    if (isSelfLoop(fromId, toId)) {
+      showToast('Không thể tạo đường nối từ trạm đến chính nó!', 'error');
+      return false;
     }
+
+    // Kiểm tra duplicate edge
+    if (isDuplicateEdge(fromId, toId, edges)) {
+      showToast('Đường nối này đã tồn tại!', 'warning');
+      return false;
+    }
+
+    const edgeId = `${fromId}-${toId}`;
+    const newEdge = {
+      from: fromId,
+      to: toId,
+      id: edgeId,
+      controlPoint: null,
+      isRequired: false
+    };
+
+    setEdges([...edges, newEdge]);
+    saveToHistory(); // Lưu vào history sau khi thêm cạnh
+    showToast('Đã thêm đường ray mới', 'success');
+    return true;
   };
 
   /**
@@ -276,10 +473,27 @@ export const GraphProvider = ({ children }) => {
   };
 
   /**
+   * Bật/tắt chế độ thêm trạm
+   */
+  const toggleAddNodeMode = () => {
+    // Tắt các chế độ khác
+    setIsAddEdgeMode(false);
+    setSelectedNodeForEdge(null);
+    setIsDeleteNodeMode(false);
+    setIsDeleteEdgeMode(false);
+    setIsEditEdgeMode(false);
+    setIsMarkRequiredMode(false);
+    setIsSelectStartNodeMode(false);
+    // Toggle chế độ thêm node
+    setIsAddNodeMode(!isAddNodeMode);
+  };
+
+  /**
    * Bật/tắt chế độ thêm đường ray
    */
   const toggleAddEdgeMode = () => {
     // Tắt các chế độ khác
+    setIsAddNodeMode(false);
     setIsDeleteNodeMode(false);
     setIsDeleteEdgeMode(false);
     setIsEditEdgeMode(false);
@@ -294,6 +508,7 @@ export const GraphProvider = ({ children }) => {
    * Bật/tắt chế độ xóa trạm
    */
   const toggleDeleteNodeMode = () => {
+    setIsAddNodeMode(false);
     setIsAddEdgeMode(false);
     setSelectedNodeForEdge(null);
     setIsDeleteEdgeMode(false);
@@ -307,6 +522,7 @@ export const GraphProvider = ({ children }) => {
    * Bật/tắt chế độ xóa đường ray
    */
   const toggleDeleteEdgeMode = () => {
+    setIsAddNodeMode(false);
     setIsAddEdgeMode(false);
     setSelectedNodeForEdge(null);
     setIsDeleteNodeMode(false);
@@ -320,6 +536,7 @@ export const GraphProvider = ({ children }) => {
    * Bật/tắt chế độ sửa độ dài đường ray
    */
   const toggleEditEdgeMode = () => {
+    setIsAddNodeMode(false);
     setIsAddEdgeMode(false);
     setSelectedNodeForEdge(null);
     setIsDeleteNodeMode(false);
@@ -333,6 +550,7 @@ export const GraphProvider = ({ children }) => {
    * Bật/tắt chế độ đánh dấu đường ray bắt buộc
    */
   const toggleMarkRequiredMode = () => {
+    setIsAddNodeMode(false);
     setIsAddEdgeMode(false);
     setSelectedNodeForEdge(null);
     setIsDeleteNodeMode(false);
@@ -346,6 +564,7 @@ export const GraphProvider = ({ children }) => {
    * Bật/tắt chế độ chọn đỉnh khởi đầu cho Prim
    */
   const toggleSelectStartNodeMode = () => {
+    setIsAddNodeMode(false);
     setIsAddEdgeMode(false);
     setSelectedNodeForEdge(null);
     setIsDeleteNodeMode(false);
@@ -389,10 +608,12 @@ export const GraphProvider = ({ children }) => {
     mstEdges,
     isAnimating,
     totalCost,
+    animationTime,
     isMenuOpen,
     algorithm,
     distanceScale,
     backgroundImage,
+    isAddNodeMode,
     isAddEdgeMode,
     selectedNodeForEdge,
     isDeleteNodeMode,
@@ -402,17 +623,28 @@ export const GraphProvider = ({ children }) => {
     executionLogs,
     primStartNode,
     isSelectStartNodeMode,
+    toasts,
+    history,
+    historyIndex,
+    canUndo: historyIndex > 0,
+    canRedo: historyIndex < history.length - 1,
     setNodes,
     setEdges,
     setMstEdges,
     setIsAnimating,
     setTotalCost,
+    setAnimationTime,
     setIsMenuOpen,
     setAlgorithm,
     setDistanceScale,
     setBackgroundImage,
     setExecutionLogs,
+    showToast,
+    removeToast,
+    undo,
+    redo,
     addNode,
+    addMultipleNodes,
     removeNode,
     removeEdge,
     addEdge,
@@ -422,6 +654,7 @@ export const GraphProvider = ({ children }) => {
     loadSampleGraph,
     updateNodePosition,
     rearrangeNodes,
+    toggleAddNodeMode,
     toggleAddEdgeMode,
     handleNodeClickForEdge,
     toggleDeleteNodeMode,
