@@ -1,4 +1,5 @@
 import React, { useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import './Modal.css';
 import { X } from 'lucide-react';
 
@@ -37,7 +38,7 @@ const Modal = ({
 
   const modalClass = `modal modal--${size} ${className}`.trim();
 
-  return (
+  const modalContent = (
     <div className="modal__backdrop" onClick={handleBackdropClick}>
       <div className={modalClass}>
         {/* Header */}
@@ -61,6 +62,8 @@ const Modal = ({
       </div>
     </div>
   );
+
+  return createPortal(modalContent, document.body);
 };
 
 export default Modal;

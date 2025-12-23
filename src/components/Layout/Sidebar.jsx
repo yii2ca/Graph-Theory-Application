@@ -239,7 +239,7 @@ const Sidebar = () => {
                 className="sidebar__full-btn"
                 style={{ marginTop: '8px' }}
               >
-                🗑️ Xóa Ảnh
+                 Xóa Ảnh
               </Button>
             )}
           </div>
@@ -260,59 +260,110 @@ const Sidebar = () => {
       <Modal
         isOpen={isHelpOpen}
         onClose={() => setIsHelpOpen(false)}
-        title="📖 Hướng Dẫn Sử Dụng"
+        title="Hướng Dẫn Sử Dụng"
         size="lg"
       >
         <div className="help-content">
           <div className="help-section">
-            <h3>🗺️ Import Ảnh Bản Đồ:</h3>
+            <h3>Import Ảnh Bản Đồ</h3>
             <ul>
-              <li><strong>Chọn ảnh:</strong> Click "📁 Chọn Ảnh" ở Sidebar để import ảnh bản đồ</li>
-              <li><strong>Xóa ảnh:</strong> Click "🗑️ Xóa Ảnh" để xóa background</li>
+              <li><strong>Chọn ảnh:</strong> Click nút "Chọn Ảnh" trong mục "Import Bản Đồ" ở Sidebar</li>
+              <li><strong>Xóa ảnh:</strong> Click "Xóa Ảnh" để xóa background</li>
             </ul>
           </div>
 
           <div className="help-section">
-            <h3>📥 Thêm Đỉnh (Trạm):</h3>
+            <h3>Thao Tác Với Trạm (Node)</h3>
             <ul>
-              <li><strong>Click chuột trái:</strong> Click vào bất kỳ đâu trên map để thêm một đỉnh mới</li>
-              <li><strong>Kéo thả đỉnh:</strong> Click và kéo để di chuyển vị trí</li>
-              <li><strong>Xóa đỉnh:</strong> Click chuột phải (Right-click) vào đỉnh</li>
+              <li><strong>Thêm trạm tự động:</strong> Click nút "Thêm Trạm" ở Sidebar (tạo trạm ở vị trí ngẫu nhiên)</li>
+              <li><strong>Thêm trạm thủ công:</strong> Click trái vào bất kỳ đâu trên canvas</li>
+              <li><strong>Di chuyển trạm:</strong> Kéo thả trạm bằng chuột trái</li>
+              <li><strong>Đổi tên trạm:</strong> Double-click vào trạm → nhập tên → Enter hoặc click bên ngoài</li>
+              <li><strong>Xóa trạm cách 1:</strong> Click chuột phải (Right-click) vào trạm</li>
+              <li><strong>Xóa trạm cách 2:</strong> Bật chế độ "Xóa Trạm" ở Sidebar → click vào trạm cần xóa</li>
+              <li><strong>Xem tên:</strong> Hover vào trạm để hiển thị tooltip</li>
             </ul>
           </div>
 
           <div className="help-section">
-            <h3>⛓ Thêm Cạnh (Đường Ray):</h3>
+            <h3>Thao Tác Với Đường Ray (Edge)</h3>
             <ul>
-              <li><strong>Ké đường nối:</strong> Nhấn giữ Shift + Kéo từ đỉnh này sang đỉnh khác</li>
-              <li><strong>Uốn cạnh:</strong> Hover vào cạnh để hiển điểm điều khiển, kéo để uốn cong</li>
-              <li><strong>Xem khoảng cách:</strong> Hover vào cạnh để xem khoảng cách tính bằng km</li>
+              <li><strong>Thêm đường ray cách 1:</strong> Nhấn giữ <kbd>Shift</kbd> + kéo từ trạm A sang trạm B</li>
+              <li><strong>Thêm đường ray cách 2:</strong> Click nút "Thêm Đường Ray" ở Sidebar → click trạm đầu → click trạm cuối</li>
+              <li><strong>Uốn cong đường:</strong> Hover vào đường → kéo chấm tròn trắng ở giữa</li>
+              <li><strong>Sửa độ dài:</strong> Click nút "Sửa Độ Dài" ở Sidebar → click vào đường → nhập giá trị mới</li>
+              <li><strong>Xóa đường ray:</strong> Click nút "Xóa Đường Ray" ở Sidebar → click vào đường cần xóa</li>
+              <li><strong>Đánh dấu bắt buộc:</strong> Click nút "Đánh Dấu Bắt Buộc" → click vào đường (đường bắt buộc sẽ có màu đỏ)</li>
+              <li><strong>Xem khoảng cách:</strong> Hover vào đường để xem số km</li>
             </ul>
           </div>
 
           <div className="help-section">
-            <h3>⚙️ Cài Đặt:</h3>
+            <h3>Các Nút Chức Năng (Sidebar)</h3>
             <ul>
-              <li><strong>Tỷ lệ (km/pixel):</strong> Điều chỉnh tỷ lệ chuyển đổi pixel sang km</li>
-              <li><strong>Thuật toán:</strong> Chọn giữa Kruskal và Prim</li>
+              <li><strong>Thêm Trạm:</strong> Tạo trạm mới ở vị trí ngẫu nhiên</li>
+              <li><strong>Thêm Đường Ray:</strong> Chế độ chọn 2 trạm để nối đường</li>
+              <li><strong>Xóa Trạm:</strong> Chế độ xóa trạm (click vào trạm để xóa)</li>
+              <li><strong>Xóa Đường Ray:</strong> Chế độ xóa đường (click vào đường để xóa)</li>
+              <li><strong>Sửa Độ Dài:</strong> Chế độ chỉnh sửa khoảng cách của đường</li>
+              <li><strong>Đánh Dấu Bắt Buộc:</strong> Đánh dấu đường phải có trong kết quả MST</li>
+              <li><strong>Xóa Tất Cả:</strong> Xóa toàn bộ đồ thị và kết quả</li>
             </ul>
           </div>
 
           <div className="help-section">
-            <h3>🌟 Chạy Thuật Toán MST:</h3>
+            <h3>Cài Đặt</h3>
             <ul>
-              <li><strong>Thực thi:</strong> Click nút "▶ Thực thi" ở Header</li>
-              <li><strong>Kết quả:</strong> Các cạnh MST sẽ được tô màu xanh lá</li>
-              <li><strong>Tổng chi phí:</strong> Hiển thị trong bảng "Thông Tin"</li>
+              <li><strong>Thuật toán:</strong> Chọn giữa Kruskal hoặc Prim</li>
+              <li><strong>Tỷ lệ (km/pixel):</strong> Điều chỉnh từ 0.1 đến 2.0 (mặc định 0.5)</li>
+              <li><em>Ví dụ: 0.5 km/pixel nghĩa là 100 pixel = 50 km</em></li>
             </ul>
           </div>
 
           <div className="help-section">
-            <h3>🛠 Công cụ:</h3>
+            <h3>Chạy Thuật Toán MST</h3>
             <ul>
-              <li><strong>Zoom:</strong> Sử dụng các nút +/- hoặc con lăn chuột</li>
-              <li><strong>Pan:</strong> Kéo thả map bằng chuột hoặc dùng mũi tên</li>
-              <li><strong>Fit Screen:</strong> Tự động zoom vừa vặn toàn bộ đồ thị</li>
+              <li><strong>Thực thi:</strong> Click nút "Thực thi" ở Header (phía trên cùng)</li>
+              <li><strong>Kết quả:</strong> Các đường ray MST sẽ được tô màu xanh lá</li>
+              <li><strong>Tổng chi phí:</strong> Hiển thị ở bảng "Thống Kê" bên phải</li>
+              <li><strong>Thời gian thực thi:</strong> Hiển thị ở bảng "Thống Kê"</li>
+            </ul>
+          </div>
+
+          <div className="help-section">
+            <h3>Công Cụ Toolbar (Góc Trái Màn Hình)</h3>
+            <ul>
+              <li><strong>Phóng to:</strong> Click nút + hoặc cuộn chuột lên</li>
+              <li><strong>Thu nhỏ:</strong> Click nút - hoặc cuộn chuột xuống</li>
+              <li><strong>Vừa màn hình:</strong> Click nút maximize để tự động zoom vừa vặn</li>
+              <li><strong>Di chuyển map:</strong> Sử dụng các nút mũi tên</li>
+              <li><strong>Tải ảnh:</strong> Click nút download để lưu đồ thị dạng PNG</li>
+              <li><strong>Kéo toolbar:</strong> Kéo biểu tượng grip để di chuyển toolbar</li>
+            </ul>
+          </div>
+
+          <div className="help-section">
+            <h3>Phím Tắt</h3>
+            <ul>
+              <li><kbd>Shift</kbd> + Kéo chuột: Tạo đường nối giữa 2 trạm</li>
+              <li><kbd>Ctrl</kbd> + Scroll chuột: Zoom in/out</li>
+              <li><strong>Double-click</strong> vào trạm: Đổi tên trạm</li>
+              <li><strong>Right-click</strong> vào trạm: Xóa trạm</li>
+              <li><strong>Click trái</strong> vào canvas: Thêm trạm mới</li>
+              <li><strong>Kéo thả</strong> trạm: Di chuyển vị trí</li>
+            </ul>
+          </div>
+
+          <div className="help-section">
+            <h3>MST (Minimum Spanning Tree) là gì?</h3>
+            <p>
+              Cây khung nhỏ nhất - kết nối tất cả trạm với tổng chiều dài đường ray ngắn nhất:
+            </p>
+            <ul>
+              <li>Không tạo vòng lặp (chu trình)</li>
+              <li>Tổng km nhỏ nhất có thể</li>
+              <li>Kết nối được mọi trạm</li>
+              <li>Tối ưu chi phí xây dựng đường sắt</li>
             </ul>
           </div>
         </div>

@@ -1,7 +1,6 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { Menu, X, Train } from 'lucide-react';
 import { useGraph } from '../../contexts/GraphContext';
-import Modal from '../UI/Modal';
 import './Header.css';
 
 const Header = () => {
@@ -9,8 +8,6 @@ const Header = () => {
     isMenuOpen,
     setIsMenuOpen,
   } = useGraph();
-
-  const [isHelpOpen, setIsHelpOpen] = useState(false);
 
   return (
     <>
@@ -33,74 +30,6 @@ const Header = () => {
           </div>
         </div>
       </header>
-
-      <Modal
-        isOpen={isHelpOpen}
-        onClose={() => setIsHelpOpen(false)}
-        title="📖 Hướng Dẫn Sử Dụng"
-        size="lg"
-      >
-        <div className="help-content">
-          <div className="help-section">
-            <h3>🗺️ Import Ảnh Bản Đồ:</h3>
-            <ul>
-              <li><strong>Chọn ảnh:</strong> Click "📁 Chọn Ảnh" ở Sidebar để import ảnh bản đồ</li>
-              <li><strong>Xóa ảnh:</strong> Click "🗑️ Xóa Ảnh" để xóa background</li>
-            </ul>
-          </div>
-
-          <div className="help-section">
-            <h3>📍 Thao Tác Với Trạm (Node):</h3>
-            <ul>
-              <li><strong>Thêm trạm:</strong> Click vào canvas để đặt trạm mới</li>
-              <li><strong>Di chuyển trạm:</strong> Kéo thả trạm bằng chuột trái</li>
-              <li><strong>Đổi tên trạm:</strong> Double-click vào trạm → nhập tên → Lưu</li>
-              <li><strong>Xóa trạm:</strong> Right-click vào trạm</li>
-              <li><strong>Xem tên:</strong> Hover vào trạm để hiển thị tooltip</li>
-            </ul>
-          </div>
-
-          <div className="help-section">
-            <h3>🔗 Thao Tác Với Đường Nối (Edge):</h3>
-            <ul>
-              <li><strong>Tạo đường nối:</strong> Shift + Kéo từ trạm A sang trạm B</li>
-              <li><strong>Uốn cong đường:</strong> Hover vào đường → kéo chấm tròn trắng</li>
-              <li><strong>Xem khoảng cách:</strong> Hover vào đường để hiển thị số km</li>
-            </ul>
-          </div>
-
-          <div className="help-section">
-            <h3>🚂 Chạy Thuật Toán MST:</h3>
-            <ul>
-              <li><strong>Chọn thuật toán:</strong> Kruskal hoặc Prim từ dropdown</li>
-              <li><strong>Thực thi:</strong> Click "▶ Thực thi" để tìm đường sắt tối ưu</li>
-              <li><strong>Kết quả:</strong> Đường xanh lá = đường sắt tối ưu (MST)</li>
-            </ul>
-          </div>
-
-          <div className="help-section">
-            <h3>❓ MST (Minimum Spanning Tree) là gì?</h3>
-            <p>
-              Cây khung nhỏ nhất - kết nối tất cả trạm với tổng chiều dài đường ray ngắn nhất:
-            </p>
-            <ul>
-              <li>✓ Không tạo vòng lặp</li>
-              <li>✓ Tổng km nhỏ nhất</li>
-              <li>✓ Kết nối mọi trạm</li>
-            </ul>
-          </div>
-
-          <div className="help-section">
-            <h3>⌨️ Phím Tắt:</h3>
-            <ul>
-              <li><strong>Shift + Kéo:</strong> Tạo đường nối</li>
-              <li><strong>Ctrl + Scroll:</strong> Zoom in/out</li>
-              <li><strong>Double-click:</strong> Đổi tên trạm</li>
-              <li><strong>Right-click:</strong> Xóa trạm</li>
-            </ul>
-          </div>
-        </div>
-      </Modal>
     </>
   );
 };
