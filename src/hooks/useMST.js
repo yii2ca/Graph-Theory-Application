@@ -1,11 +1,12 @@
 import { useState } from 'react';
 import { kruskalMST, primMST } from '../algorithms/mst';
 import { pixelsToKm } from '../utils/calculations';
+import { validateGraphForMST } from '../algorithms/graphUtils';
 
 /**
  * Custom hook để xử lý MST algorithm
  */
-export const useMST = (nodes, edges, setMstEdges, setTotalCost, setExecutionLogs, distanceScale, primStartNode) => {
+export const useMST = (nodes, edges, setMstEdges, setTotalCost, setExecutionLogs, distanceScale, primStartNode, showToast, setAnimationTime) => {
   const [isAnimating, setIsAnimating] = useState(false);
 
   /**
@@ -13,19 +14,22 @@ export const useMST = (nodes, edges, setMstEdges, setTotalCost, setExecutionLogs
    * @param {string} algorithm - 'kruskal' hoặc 'prim'
    */
   const findMST = async (algorithm = 'kruskal') => {
-    if (nodes.length < 2) {
-      console.warn('Cần ít nhất 2 đỉnh để tính MST');
-      return;
-    }
-
-    if (!edges || edges.length === 0) {
-      console.warn('Cần ít nhất 1 cạnh để tính MST');
+    // Validation đầu vào
+    const validation = validateGraphForMST(nodes, edges);
+    if (!validation.valid) {
+      if (showToast) {
+        showToast(validation.error, 'error');
+      } else {
+        console.error(validation.error);
+      }
       return;
     }
 
     setIsAnimating(true);
     setMstEdges([]);
     setTotalCost(0);
+    
+    const startTime = performance.now();
     
     // Reset execution logs
     const logs = [];
@@ -41,9 +45,22 @@ export const useMST = (nodes, edges, setMstEdges, setTotalCost, setExecutionLogs
 
       // Kiểm tra kết quả
       if (!result || !result.mstEdges) {
-        console.error('Thuật toán trả về kết quả không hợp lệ');
+        const errorMsg = 'Thuật toán trả về kết quả không hợp lệ';
+        console.error(errorMsg);
+        if (showToast) {
+          showToast(errorMsg, 'error');
+        }
         setIsAnimating(false);
         return;
+      }
+
+      // Kiểm tra xem có tìm được MST đầy đủ không
+      if (result.mstEdges.length < nodes.length - 1) {
+        const errorMsg = `Không thể tạo MST hoàn chỉnh! Chỉ tìm được ${result.mstEdges.length}/${nodes.length - 1} cạnh. Đồ thị có thể không liên thông.`;
+        console.warn(errorMsg);
+        if (showToast) {
+          showToast(errorMsg, 'warning');
+        }
       }
 
       console.log(`${algorithm.toUpperCase()} MST:`, {
@@ -103,6 +120,13 @@ export const useMST = (nodes, edges, setMstEdges, setTotalCost, setExecutionLogs
       }
 
       // Log kết thúc
+      const endTime = performance.now();
+      const executionTimeMs = Math.round(endTime - startTime);
+      
+      if (setAnimationTime) {
+        setAnimationTime(executionTimeMs);
+      }
+      
       const resultTotalCost = typeof result.totalCost === 'number' && !isNaN(result.totalCost) ? result.totalCost : 0;
       const totalCostInKm = pixelsToKm(resultTotalCost, distanceScale);
       const endLog = {
@@ -118,8 +142,17 @@ export const useMST = (nodes, edges, setMstEdges, setTotalCost, setExecutionLogs
       }
 
       setTotalCost(result.totalCost);
+      
+      // Hiển thị thông báo thành công
+      if (showToast) {
+        showToast(`MST hoàn thành! Tổng chi phí: ${totalCostInKm.toFixed(2)} km`, 'success');
+      }
     } catch (error) {
       console.error('Lỗi khi tính MST:', error);
+      
+      if (showToast) {
+        showToast('Có lỗi xảy ra khi tính toán MST', 'error');
+      }
       
       // Log lỗi
       const errorLog = {

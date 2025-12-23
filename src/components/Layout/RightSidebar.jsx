@@ -13,15 +13,28 @@ const RightSidebar = ({ mapCanvasRef }) => {
     edges,
     algorithm,
     totalCost,
+    animationTime,
     distanceScale,
     executionLogs,
     primStartNode,
     setMstEdges,
     setTotalCost,
+    setAnimationTime,
     setExecutionLogs,
+    showToast,
   } = useGraph();
 
-  const { findMST, isAnimating } = useMST(nodes, edges, setMstEdges, setTotalCost, setExecutionLogs, distanceScale, primStartNode);
+  const { findMST, isAnimating } = useMST(
+    nodes, 
+    edges, 
+    setMstEdges, 
+    setTotalCost, 
+    setExecutionLogs, 
+    distanceScale, 
+    primStartNode,
+    showToast,
+    setAnimationTime
+  );
 
   /**
    * Xóa log thực thi

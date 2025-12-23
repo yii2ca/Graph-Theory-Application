@@ -1,14 +1,16 @@
 import React, { useState } from 'react';
-import { Activity, Plus, Map, MapPin, HelpCircle, GitBranch, Trash2, Edit3, Lock, Play } from 'lucide-react';
+import { Activity, Plus, Map, MapPin, HelpCircle, GitBranch, Trash2, Edit3, Lock, Play, Undo, Redo } from 'lucide-react';
 import { useGraph } from '../../contexts/GraphContext';
 import { pixelsToKm } from '../../utils/calculations';
 import Card from '../UI/Card';
 import Button from '../UI/Button';
 import Modal from '../UI/Modal';
+import AddMultipleNodesModal from '../Controls/AddMultipleNodesModal';
 import './Sidebar.css';
 
 const Sidebar = () => {
   const [isHelpOpen, setIsHelpOpen] = useState(false);
+  const [isAddMultipleNodesOpen, setIsAddMultipleNodesOpen] = useState(false);
   
   const {
     nodes,
@@ -18,6 +20,7 @@ const Sidebar = () => {
     distanceScale,
     backgroundImage,
     algorithm = 'kruskal',
+    isAddNodeMode,
     isAddEdgeMode,
     isDeleteNodeMode,
     isDeleteEdgeMode,
@@ -25,11 +28,15 @@ const Sidebar = () => {
     isMarkRequiredMode,
     primStartNode,
     isSelectStartNodeMode,
+    canUndo,
+    canRedo,
     setAlgorithm,
     setDistanceScale,
     setBackgroundImage,
     clearGraph,
     addNode,
+    addMultipleNodes,
+    toggleAddNodeMode,
     toggleAddEdgeMode,
     toggleDeleteNodeMode,
     toggleDeleteEdgeMode,
@@ -37,6 +44,8 @@ const Sidebar = () => {
     toggleMarkRequiredMode,
     toggleSelectStartNodeMode,
     setExecutionLogs,
+    undo,
+    redo,
     edges: allEdges = [],
   } = useGraph();
 
@@ -105,13 +114,23 @@ const Sidebar = () => {
         >
           <div className="sidebar__settings">
             <Button
-              variant="primary"
+              variant={isAddNodeMode ? "success" : "primary"}
               size="md"
-              onClick={handleAddStation}
+              onClick={toggleAddNodeMode}
               className="sidebar__full-btn"
               icon={MapPin}
             >
-              Thêm Trạm
+              {isAddNodeMode ? "Đang thêm trạm..." : "Thêm Trạm"}
+            </Button>
+
+            <Button
+              variant="secondary"
+              size="md"
+              onClick={() => setIsAddMultipleNodesOpen(true)}
+              className="sidebar__full-btn"
+              icon={MapPin}
+            >
+              Thêm Nhiều Trạm
             </Button>
 
             <Button
@@ -163,6 +182,32 @@ const Sidebar = () => {
             >
               {isMarkRequiredMode ? "Đang đánh dấu..." : "Đánh Dấu Bắt Buộc"}
             </Button>
+
+            {/* Undo/Redo Buttons */}
+            <div style={{ display: 'flex', gap: '8px', marginTop: '8px' }}>
+              <Button
+                variant="secondary"
+                size="md"
+                onClick={undo}
+                disabled={!canUndo}
+                className="sidebar__half-btn"
+                icon={Undo}
+                title="Hoàn tác (Ctrl+Z)"
+              >
+                Hoàn tác
+              </Button>
+              <Button
+                variant="secondary"
+                size="md"
+                onClick={redo}
+                disabled={!canRedo}
+                className="sidebar__half-btn"
+                icon={Redo}
+                title="Làm lại (Ctrl+Shift+Z)"
+              >
+                Làm lại
+              </Button>
+            </div>
 
             <div className="sidebar__input-group">
               <label className="sidebar__input-label">
@@ -275,8 +320,9 @@ const Sidebar = () => {
           <div className="help-section">
             <h3>Thao Tác Với Trạm (Node)</h3>
             <ul>
-              <li><strong>Thêm trạm tự động:</strong> Click nút "Thêm Trạm" ở Sidebar (tạo trạm ở vị trí ngẫu nhiên)</li>
-              <li><strong>Thêm trạm thủ công:</strong> Click trái vào bất kỳ đâu trên canvas</li>
+              <li><strong>Thêm nhiều trạm cùng lúc:</strong> Click nút "Thêm Nhiều Trạm" → chọn số lượng hoặc nhập danh sách tên → Thêm Trạm</li>
+              <li><strong>Thêm nhiều trạm liên tục:</strong> Click nút "Thêm Trạm" ở Sidebar → click nhiều lần trên canvas → click lại nút "Thêm Trạm" để thoát</li>
+              <li><strong>Thêm trạm đơn lẻ:</strong> Click trái vào bất kỳ đâu trên canvas (khi không ở chế độ đặc biệt nào)</li>
               <li><strong>Di chuyển trạm:</strong> Kéo thả trạm bằng chuột trái</li>
               <li><strong>Đổi tên trạm:</strong> Double-click vào trạm → nhập tên → Enter hoặc click bên ngoài</li>
               <li><strong>Xóa trạm cách 1:</strong> Click chuột phải (Right-click) vào trạm</li>
@@ -301,7 +347,8 @@ const Sidebar = () => {
           <div className="help-section">
             <h3>Các Nút Chức Năng (Sidebar)</h3>
             <ul>
-              <li><strong>Thêm Trạm:</strong> Tạo trạm mới ở vị trí ngẫu nhiên</li>
+              <li><strong>Thêm Trạm:</strong> Bật chế độ thêm trạm liên tục (click nhiều lần trên canvas)</li>
+              <li><strong>Thêm Nhiều Trạm:</strong> Mở modal để thêm nhiều trạm cùng lúc (theo số lượng hoặc danh sách)</li>
               <li><strong>Thêm Đường Ray:</strong> Chế độ chọn 2 trạm để nối đường</li>
               <li><strong>Xóa Trạm:</strong> Chế độ xóa trạm (click vào trạm để xóa)</li>
               <li><strong>Xóa Đường Ray:</strong> Chế độ xóa đường (click vào đường để xóa)</li>
@@ -368,6 +415,14 @@ const Sidebar = () => {
           </div>
         </div>
       </Modal>
+
+      {/* Add Multiple Nodes Modal */}
+      <AddMultipleNodesModal
+        isOpen={isAddMultipleNodesOpen}
+        onClose={() => setIsAddMultipleNodesOpen(false)}
+        onAddNodes={addMultipleNodes}
+        currentNodeCount={nodes.length}
+      />
     </aside>
   );
 };
