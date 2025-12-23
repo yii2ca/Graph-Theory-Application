@@ -143,49 +143,51 @@ const RightSidebar = ({ mapCanvasRef }) => {
         </Card>
 
         {/* Execution Logs */}
-        {executionLogs && executionLogs.length > 0 && (
-          <Card
-            title="Lịch Sử Thực Thi"
-            icon={ListOrdered}
-            variant="info"
-            collapsible
-            defaultOpen
-          >
-            <div className="execution-logs">
-              <div className="execution-logs__header">
-                <Button
-                  variant="danger"
-                  size="sm"
-                  onClick={handleClearLogs}
-                  icon={Trash2}
-                >
-                  Xóa log
-                </Button>
-              </div>
-              <div className="execution-logs__list">
-                {executionLogs.map((log, index) => (
-                  <div 
-                    key={index} 
-                    className={`execution-log-item execution-log-item--${log.type}`}
+        <Card
+          title="Lịch Sử Thực Thi"
+          icon={ListOrdered}
+          variant="info"
+          collapsible
+          defaultOpen
+        >
+          <div className="execution-logs">
+            {executionLogs && executionLogs.length > 0 && (
+              <>
+                <div className="execution-logs__header">
+                  <Button
+                    variant="danger"
+                    size="sm"
+                    onClick={handleClearLogs}
+                    icon={Trash2}
                   >
-                    <div className="execution-log-item__header">
-                      <span className="execution-log-item__step">
-                        {log.type === 'start' ? '🚀' : 
-                         log.type === 'end' ? '✓' : 
-                         log.type === 'error' ? '✗' : 
-                         `#${log.step}`}
-                      </span>
-                      <span className="execution-log-item__time">{log.timestamp}</span>
+                    Xóa log
+                  </Button>
+                </div>
+                <div className="execution-logs__list">
+                  {executionLogs.map((log, index) => (
+                    <div 
+                      key={index} 
+                      className={`execution-log-item execution-log-item--${log.type}`}
+                    >
+                      <div className="execution-log-item__header">
+                        <span className="execution-log-item__step">
+                          {log.type === 'start' ? '🚀' : 
+                           log.type === 'end' ? '✓' : 
+                           log.type === 'error' ? '✗' : 
+                           `#${log.step}`}
+                        </span>
+                        <span className="execution-log-item__time">{log.timestamp}</span>
+                      </div>
+                      <div className="execution-log-item__content">
+                        <p className="execution-log-item__message">{log.message}</p>
+                      </div>
                     </div>
-                    <div className="execution-log-item__content">
-                      <p className="execution-log-item__message">{log.message}</p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </Card>
-        )}
+                  ))}
+                </div>
+              </>
+            )}
+          </div>
+        </Card>
 
         {/* Execute Algorithm Button */}
         <Button
