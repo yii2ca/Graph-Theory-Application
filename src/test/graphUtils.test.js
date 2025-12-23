@@ -224,7 +224,9 @@ describe('graphUtils - Validation Functions', () => {
       ];
       const edges = [
         { from: 0, to: 1 },
-        { from: 2, to: 3 }
+        { from: 0, to: 2 },
+        { from: 1, to: 2 }
+        // Node 3 bị cô lập - có 3 edges (đủ n-1) nhưng vẫn disconnected
       ];
 
       const result = validateGraphForMST(nodes, edges);
